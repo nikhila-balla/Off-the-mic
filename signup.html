@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up — Off The Mic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card fade-in">
+      <div class="auth-logo">Off The Mic</div>
+      <p class="auth-subtitle">start your journey to confident speaking.</p>
+
+      <div id="auth-error" class="hidden"
+           style="background:#FFF0EE;border:1px solid #f0b9b0;border-radius:10px;
+                  padding:0.8rem 1rem;font-size:0.83rem;color:#9b4b3e;margin-bottom:1.2rem;"></div>
+      <div id="auth-success" class="hidden"
+           style="background:#F0F5EF;border:1px solid #a8c09f;border-radius:10px;
+                  padding:0.8rem 1rem;font-size:0.83rem;color:#3e6b45;margin-bottom:1.2rem;"></div>
+
+      <div class="form-group">
+        <label for="name">Display Name</label>
+        <input type="text" id="name" placeholder="your name" autocomplete="name" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="password" placeholder="min. 8 characters" autocomplete="new-password" style="padding-right:3rem;" />
+          <button type="button" onclick="togglePassword('password','eye-pass')"
+                  style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;color:var(--muted);
+                         font-size:1rem;padding:0;line-height:1;">
+            <span id="eye-pass">👁️</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm">Confirm Password</label>
+        <div style="position:relative;">
+          <input type="password" id="confirm" placeholder="••••••••" autocomplete="new-password" style="padding-right:3rem;" />
+          <button type="button" onclick="togglePassword('confirm','eye-confirm')"
+                  style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;color:var(--muted);
+                         font-size:1rem;padding:0;line-height:1;">
+            <span id="eye-confirm">👁️</span>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="signup-btn"
+              style="width:100%;justify-content:center;margin-top:0.5rem;"
+              onclick="handleSignup()">
+        Create Account
+      </button>
+
+      <p class="auth-switch">already have one? <a href="login.html">login here</a></p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+  <script>
+    const API = API_BASE;
+
+    async function handleSignup() {
+      const name     = document.getElementById('name').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirm').value;
+      const errBox   = document.getElementById('auth-error');
+      const okBox    = document.getElementById('auth-success');
+      const btn      = document.getElementById('signup-btn');
+
+      errBox.classList.add('hidden');
+      okBox.classList.add('hidden');
+
+      if (!name || !email || !password) {
+        errBox.textContent = 'Please fill in all fields.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+      if (password.length < 8) {
+        errBox.textContent = 'Password must be at least 8 characters.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+      if (password !== confirm) {
+        errBox.textContent = 'Passwords do not match.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      btn.textContent = 'Creating account…';
+      btn.disabled    = true;
+
+      try {
+        const res = await fetch(`${API}/auth/signup`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email, password, display_name: name }),
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+          errBox.textContent = data.message;
+          errBox.classList.remove('hidden');
+          btn.textContent = 'Create Account';
+          btn.disabled    = false;
+          return;
+        }
+
+        okBox.textContent = 'Account created! Redirecting to login…';
+        okBox.classList.remove('hidden');
+        showToast('Welcome to Off The Mic! ✦');
+        setTimeout(() => window.location.href = 'login.html', 1400);
+
+      } catch (err) {
+        errBox.textContent = 'Could not connect to server. Is the backend running?';
+        errBox.classList.remove('hidden');
+        btn.textContent = 'Create Account';
+        btn.disabled    = false;
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleSignup();
+    });
+  </script>
+</body>
+</html>

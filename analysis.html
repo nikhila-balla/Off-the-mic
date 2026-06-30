@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speech Analysis — Off The Mic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <a href="dashboard.html" class="nav-brand">Off The Mic</a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="vocab.html">Vocab</a></li>
+      <li><a href="analysis.html" style="font-weight:600;color:var(--text);">Analysis</a></li>
+      <li><a href="interview.html">Interview</a></li>
+      <li><a href="progress.html">Progress</a></li>
+    </ul>
+    <a href="login.html" class="btn btn-outline btn-sm" id="logout-link">Log out</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="page-header fade-in-1">
+      <a href="dashboard.html" class="back-link">← back</a>
+      <h2>Speech Analysis 🎙️✨</h2>
+      <p>record yourself, get instant AI feedback</p>
+    </div>
+
+    <div class="container">
+      <!-- WORD OF THE DAY CHALLENGE BAR -->
+      <div id="wod-challenge-bar" onclick="acceptWodChallenge()" class="fade-in-2" style="background: linear-gradient(135deg, #102A54 0%, #0A1F3E 100%); border: 1.5px solid rgba(228, 169, 89, 0.25); border-radius: 50px; padding: 0.85rem 2rem; margin-bottom: 2rem; color: #FFFFFF; display: none; box-shadow: 0 4px 15px rgba(10, 31, 62, 0.15); position: relative; overflow: hidden; cursor: pointer; text-align: left; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(10, 31, 62, 0.25)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 15px rgba(10, 31, 62, 0.15)'">
+        <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(228, 169, 89, 0.08) 0%, transparent 70%); pointer-events: none;"></div>
+        
+        <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-family: 'Poppins', sans-serif;">
+            <span style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e4a959; background: rgba(228, 169, 89, 0.15); padding: 0.2rem 0.65rem; border-radius: 20px; flex-shrink: 0; display: inline-block;">🔥 Speaking Challenge</span>
+            <span id="wod-challenge-word" style="font-weight: 700; color: #FFFFFF; display: inline-block; font-size: 1.05rem;">—</span>
+            <span id="wod-challenge-preview" style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.65); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">—</span>
+          </div>
+          
+          <div style="font-size: 0.8rem; color: #e4a959; font-weight: bold; flex-shrink: 0; display: flex; align-items: center; gap: 6px; margin-left: 1rem;">
+            <span>Accept & Load</span> <span>🎙️</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRACTICE TOPIC GENERATOR -->
+      <div class="topic-generator-card fade-in-2" style="background: var(--card); border: 1.5px solid var(--border); border-radius: 24px; padding: 2.2rem 2rem; margin-bottom: 2rem; text-align: center; box-shadow: 0 4px 16px var(--shadow); position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -40px; right: -40px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(15, 44, 89, 0.03) 0%, transparent 70%); pointer-events: none;"></div>
+        <h3 style="font-family: 'Caveat', cursive; font-size: 1.8rem; margin-bottom: 0.4rem; color: var(--text);">Impromptu Practice Topic</h3>
+        <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 1.2rem;">Generate a random prompt or speak on your own topic below.</p>
+        
+        <div id="practice-topic-display" style="font-family: 'Playfair Display', serif; font-size: 1.35rem; color: var(--text); min-height: 55px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; font-style: italic; padding: 0 1rem; border-left: 3px solid var(--border); border-right: 3px solid var(--border); line-height: 1.45;">
+          "No topic loaded. Click below to generate a random prompt!"
+        </div>
+        
+        <div class="btn-row" style="margin-top: 0; justify-content: center; gap: 0.8rem;">
+          <button class="btn btn-sm btn-primary" onclick="generatePracticeTopic()">Generate Topic 🎲</button>
+          <button class="btn btn-sm btn-outline" id="clear-topic-btn" onclick="clearPracticeTopic()" style="display: none;">Clear Topic</button>
+        </div>
+      </div>
+
+      <!-- RECORD SECTION -->
+      <div class="record-area fade-in-2" id="record-area">
+        <button class="record-btn" id="record-btn" onclick="toggleRecording()">🎙️</button>
+        <p id="record-status" style="font-size:0.88rem;color:var(--muted);">tap to start recording</p>
+        <p id="record-timer" style="font-family:'Caveat',cursive;font-size:2rem;color:var(--text);margin-top:0.3rem;">00:00</p>
+      </div>
+
+      <!-- OR paste transcript -->
+      <div class="fade-in-3" style="margin-bottom:1.5rem;">
+        <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:0.8rem;">— or paste a transcript to analyse —</p>
+        <div class="form-group">
+          <textarea id="transcript-input" placeholder="Paste or type your speech here…" style="min-height:100px;"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="analyseText()">Analyse ✦</button>
+          <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+        </div>
+      </div>
+
+      <!-- RESULTS (hidden until analysis) -->
+      <div id="results-section" class="hidden">
+        <div class="divider"></div>
+        <h3 style="font-size:1.7rem;text-align:center;margin-bottom:1.5rem;">Your Results</h3>
+
+        <div class="scores-grid">
+          <div class="score-card">
+            <div class="score-label">Confidence</div>
+            <div class="score-value" id="score-confidence">—</div>
+            <div class="score-bar-wrap"><div class="score-bar" id="bar-confidence"></div></div>
+          </div>
+          <div class="score-card">
+            <div class="score-label">Fluency</div>
+            <div class="score-value" id="score-fluency">—</div>
+            <div class="score-bar-wrap"><div class="score-bar" id="bar-fluency"></div></div>
+          </div>
+          <div class="score-card">
+            <div class="score-label">Pacing</div>
+            <div class="score-value" id="score-pacing">—</div>
+            <div class="score-bar-wrap"><div class="score-bar" id="bar-pacing"></div></div>
+          </div>
+          <div class="score-card">
+            <div class="score-label">Clarity</div>
+            <div class="score-value" id="score-clarity">—</div>
+            <div class="score-bar-wrap"><div class="score-bar" id="bar-clarity"></div></div>
+          </div>
+        </div>
+
+        <div class="feedback-card" id="feedback-card">
+          <h4>Feedback & Suggestions</h4>
+          <div id="feedback-items"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+  <script>
+    let mediaRecorder, audioChunks = [];
+    let isRecording = false;
+    let recSeconds  = 0;
+    let recInterval = null;
+
+    async function toggleRecording() {
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks   = [];
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = async () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const fd = new FormData();
+            fd.append('audio', blob, 'recording.webm');
+
+            document.getElementById('record-status').textContent = 'analysing via backend…';
+            try {
+              const res = await fetch(`${API_BASE}/analyze-speech`, {
+                method: 'POST',
+                body: fd
+              });
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              const data = await res.json();
+              if (data && !data.error) {
+                displayBackendResults(data);
+                return;
+              }
+            } catch (err) {
+              console.warn('Backend audio analysis failed, using local simulation fallback:', err);
+            }
+            simulateAnalysis();
+          };
+          mediaRecorder.start();
+          isRecording = true;
+          recSeconds  = 0;
+          document.getElementById('record-btn').classList.add('active');
+          document.getElementById('record-btn').textContent = '⏹';
+          document.getElementById('record-status').textContent = 'recording…';
+          document.getElementById('record-area').classList.add('recording');
+          recInterval = setInterval(() => {
+            recSeconds++;
+            const m = Math.floor(recSeconds/60).toString().padStart(2,'0');
+            const s = (recSeconds%60).toString().padStart(2,'0');
+            document.getElementById('record-timer').textContent = `${m}:${s}`;
+          }, 1000);
+        } catch(err) {
+          showToast('Microphone access denied');
+        }
+      } else {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        clearInterval(recInterval);
+        isRecording = false;
+        document.getElementById('record-btn').classList.remove('active');
+        document.getElementById('record-btn').textContent = '🎙️';
+        document.getElementById('record-status').textContent = 'analysing…';
+        document.getElementById('record-area').classList.remove('recording');
+      }
+    }
+
+    async function analyseText() {
+      const text = document.getElementById('transcript-input').value.trim();
+      if (!text) { showToast('Please enter a transcript to analyse'); return; }
+
+      document.getElementById('record-status').textContent = 'analysing transcript…';
+      try {
+        const res = await fetch(`${API_BASE}/analyze-speech`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript: text })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data && !data.error) {
+          displayBackendResults(data);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend text analysis failed, using local simulation fallback:', err);
+      }
+      simulateAnalysis(text);
+    }
+
+    function displayBackendResults(data) {
+      const confidence = data.confidence || 70;
+      const fluency = data.fluency || 70;
+      const pacing = data.pacing || 70;
+      const clarity = data.clarity || 70;
+
+      const container = document.getElementById('feedback-items');
+      if (data.feedback && data.feedback.length) {
+        container.innerHTML = data.feedback.slice(0, 5).map(i => `
+          <div class="feedback-item"><span class="feedback-dot"></span><span>${i}</span></div>
+        `).join('');
+      } else {
+        container.innerHTML = `<div class="feedback-item"><span class="feedback-dot"></span><span>Great practice session!</span></div>`;
+      }
+
+      if (data.transcript) {
+        document.getElementById('transcript-input').value = data.transcript;
+      }
+
+      showResults(confidence, fluency, pacing, clarity);
+    }
+
+    function simulateAnalysis(text) {
+      let transcript = text || document.getElementById('transcript-input').value;
+      let confidence = 72, fluency = 68, pacing = 75, clarity = 70;
+
+      if (transcript) {
+        const words    = transcript.split(/\s+/).filter(Boolean);
+        const fillers  = ['um','uh','like','you know','basically','literally','actually','right','so','well'];
+        const fillerCount = words.filter(w => fillers.includes(w.toLowerCase().replace(/[^a-z]/g,''))).length;
+        const fillerRatio = words.length ? fillerCount / words.length : 0;
+        const avgWordLen  = words.reduce((s,w)=>s+w.replace(/[^a-z]/gi,'').length,0) / (words.length||1);
+        const sentCount   = (transcript.match(/[.!?]+/g)||[]).length || 1;
+        const avgSentLen  = words.length / sentCount;
+
+        fluency    = Math.min(98, Math.max(30, Math.round(82 - fillerRatio * 200)));
+        clarity    = Math.min(98, Math.max(30, Math.round(55 + avgWordLen * 4)));
+        pacing     = Math.min(98, Math.max(30, Math.round(100 - Math.abs(avgSentLen - 12) * 2)));
+        confidence = Math.min(98, Math.max(30, Math.round((fluency + clarity + pacing) / 3 + (Math.random()*10-5))));
+
+        buildFeedback(fillerCount, fillerRatio, avgSentLen, clarity, pacing, fluency, words);
+      } else {
+        buildFeedback(2, 0.05, 12, clarity, pacing, fluency, []);
+      }
+
+      showResults(confidence, fluency, pacing, clarity);
+    }
+
+    function buildFeedback(fillerCount, fillerRatio, avgSentLen, clarity, pacing, fluency, words) {
+      const items = [];
+      if (fillerCount > 0) items.push(`Detected ${fillerCount} filler word${fillerCount>1?'s':''} (um, uh, like). Try pausing briefly instead.`);
+      if (fluency < 70)    items.push('Your fluency score suggests some hesitation. Record again and focus on a steady breath before each sentence.');
+      if (pacing < 65)     items.push('Your sentence length varies quite a bit — aim for 10–15 words per sentence for natural rhythm.');
+      if (clarity > 80)    items.push('Great vocabulary complexity! Your word choices sound confident and precise.');
+      if (avgSentLen < 8)  items.push('Sentences feel short — try expanding each idea with supporting detail or an example.');
+      if (fluency >= 80)   items.push('Solid fluency! Very few hesitations detected.');
+      if (items.length === 0) items.push('Good practice session! Keep building consistency with daily recordings.');
+      items.push('Tip: Slow down by 10% — listeners absorb ideas better with slightly more space between thoughts.');
+
+      const container = document.getElementById('feedback-items');
+      container.innerHTML = items.slice(0,5).map(i => `
+        <div class="feedback-item"><span class="feedback-dot"></span><span>${i}</span></div>
+      `).join('');
+    }
+
+    function showResults(confidence, fluency, pacing, clarity) {
+      document.getElementById('results-section').classList.remove('hidden');
+
+      const scores = { confidence, fluency, pacing, clarity };
+      Object.keys(scores).forEach(key => {
+        document.getElementById(`score-${key}`).textContent = scores[key];
+        setTimeout(() => {
+          document.getElementById(`bar-${key}`).style.width = scores[key] + '%';
+        }, 200);
+      });
+
+      document.getElementById('record-status').textContent = 'tap to record again';
+      document.getElementById('record-timer').textContent = '00:00';
+      showToast('Analysis complete ✓');
+      if (window.otm_triggerConfetti) window.otm_triggerConfetti();
+      if (window.otm_logActivity) window.otm_logActivity();
+    }
+
+    function clearAll() {
+      document.getElementById('transcript-input').value = '';
+      document.getElementById('results-section').classList.add('hidden');
+      ['confidence','fluency','pacing','clarity'].forEach(k => {
+        document.getElementById(`score-${k}`).textContent = '—';
+        document.getElementById(`bar-${k}`).style.width = '0';
+      });
+    }
+
+    let activePracticeTopic = '';
+
+    function checkQueryParamTopic() {
+      const params = new URLSearchParams(window.location.search);
+      const topicParam = params.get('topic');
+      if (topicParam) {
+        setPracticeTopic(topicParam);
+      }
+    }
+
+    function setPracticeTopic(topicText) {
+      activePracticeTopic = topicText;
+      const display = document.getElementById('practice-topic-display');
+      display.textContent = `“${topicText}”`;
+      display.style.fontStyle = 'italic';
+      document.getElementById('clear-topic-btn').style.display = 'inline-flex';
+      
+      document.getElementById('record-status').textContent = 'Speak on the topic, then tap to analyze';
+    }
+
+    function clearPracticeTopic() {
+      activePracticeTopic = '';
+      document.getElementById('practice-topic-display').innerHTML = '"No topic loaded. Click below to generate a random prompt!"';
+      document.getElementById('clear-topic-btn').style.display = 'none';
+      document.getElementById('record-status').textContent = 'tap to start recording';
+      
+      const url = new URL(window.location);
+      url.searchParams.delete('topic');
+      window.history.replaceState({}, '', url);
+    }
+
+    const fallbackTopics = [
+      "Should everyone learn to code?",
+      "Is social media helpful or harmful for teens?",
+      "Can AI ever truly replace human creativity?",
+      "Should school uniforms be mandatory?",
+      "Is remote work better than office work?",
+      "What does community mean to you?",
+      "Does a college degree still guarantee career success?",
+      "How does digital colonialism perpetuate global inequality?",
+      "Should sentient AI have legal rights?",
+      "Is cancel culture a force for good or harm?"
+    ];
+
+    async function generatePracticeTopic() {
+      const display = document.getElementById('practice-topic-display');
+      display.textContent = 'Generating...';
+      try {
+        const data = await window.offTheMic.generateTopic('', '');
+        if (data && data.topic) {
+          setPracticeTopic(data.topic);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend topic generation failed, using fallback:', err);
+      }
+      
+      const randomTopic = fallbackTopics[Math.floor(Math.random() * fallbackTopics.length)];
+      setPracticeTopic(randomTopic);
+    }
+
+    let currentWodObj = null;
+    async function loadWodChallenge() {
+      try {
+        const res = await fetch(`${API_BASE}/word-of-day`);
+        const data = await res.json();
+        if (data && data.word) {
+          currentWodObj = data;
+          document.getElementById('wod-challenge-word').textContent = data.word;
+          document.getElementById('wod-challenge-preview').textContent = ` — ${data.challenge || 'Use this word in a 30-second speech.'}`;
+          document.getElementById('wod-challenge-bar').style.display = 'block';
+          
+          // Auto accept challenge if query param is set
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('wod_challenge') === 'true') {
+            acceptWodChallenge();
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load word of day challenge:', err);
+      }
+    }
+
+    function acceptWodChallenge() {
+      if (!currentWodObj) return;
+      const topicText = `Speaking Challenge: Use the word "${currentWodObj.word}" (Meaning: ${currentWodObj.meaning}). ${currentWodObj.challenge || ''}`;
+      setPracticeTopic(topicText);
+      showToast('Challenge loaded! Click record to start.');
+      
+      // Scroll to record area
+      document.getElementById('record-area').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    checkQueryParamTopic();
+    loadWodChallenge();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Vocab — Off The Mic</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: var(--bg) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .page-wrapper {
+      padding-top: 100px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Vocabulary card design adapted from speechtopicgen.com */
+    .vocab-card-display {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 16px var(--shadow);
+      display: none;
+    }
+    .vocab-card-display.visible {
+      display: block;
+      animation: fwPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+  </style>
+</head>
+<body class="page-vocab">
+  <nav>
+    <a href="dashboard.html" class="nav-brand">Off The Mic</a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="vocab.html" style="font-weight:600;color:var(--text);">Vocab</a></li>
+      <li><a href="analysis.html">Analysis</a></li>
+      <li><a href="interview.html">Interview</a></li>
+      <li><a href="progress.html">Progress</a></li>
+    </ul>
+    <a href="login.html" class="btn btn-outline btn-sm" id="logout-link">Log out</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <!-- Mode Tab Bar -->
+    <div class="tab-bar" id="tabBar">
+        <a href="interview.html" class="tab-btn" style="text-decoration:none;">Interview Prep</a>
+        <a href="vocab.html" class="tab-btn active" style="text-decoration:none;">Learn Vocab</a>
+    </div>
+
+    <!-- WORD OF THE DAY BANNER -->
+    <div class="container fade-in-2" style="max-width: 1400px; width:100%; margin: 0 auto 1.5rem; padding: 0 3rem;">
+      <div id="word-of-the-day-banner" onclick="toggleWodCard()" style="background: linear-gradient(135deg, #102A54 0%, #0A1F3E 100%); border: 1.5px solid rgba(228, 169, 89, 0.25); border-radius: 50px; padding: 0.85rem 2rem; color: #FFFFFF; display: none; box-shadow: 0 6px 20px rgba(10, 31, 62, 0.2); position: relative; overflow: hidden; cursor: pointer; text-align: left;">
+        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(228, 169, 89, 0.08) 0%, transparent 70%); pointer-events: none;"></div>
+        
+        <!-- Collapsed Content -->
+        <div id="wod-collapsed-content" style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; transition: opacity 0.3s ease; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+            <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e4a959; background: rgba(228, 169, 89, 0.15); padding: 0.25rem 0.75rem; border-radius: 20px; flex-shrink: 0; display: inline-block;">✨ Word of the Day</span>
+            <span id="dailyWord" style="font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: #FFFFFF; display: inline-block;">—</span>
+            <span id="wod-collapsed-meaning-preview" style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">—</span>
+          </div>
+          <div style="font-size: 0.8rem; color: #e4a959; font-weight: bold; flex-shrink: 0; display: flex; align-items: center; gap: 6px; margin-left: 1rem;">
+            <span>Tap to reveal</span> <span id="wod-chevron" style="transition: transform 0.3s ease; display: inline-block; font-size: 0.7rem;">▼</span>
+          </div>
+        </div>
+
+        <!-- Expanded Content -->
+        <div id="wod-expanded-content" style="display: none; opacity: 0; flex-direction: column; gap: 1.5rem; position: relative; z-index: 1; width: 100%; transition: opacity 0.4s ease; text-align: left;">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 1.5px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
+            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e4a959; background: rgba(228, 169, 89, 0.12); padding: 0.2rem 0.8rem; border-radius: 20px; width: fit-content;">✨ Word of the Day Details</span>
+            <div style="font-size: 0.8rem; color: #e4a959; font-weight: bold; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <span>Collapse</span> <span style="transform: rotate(180deg); font-size: 0.7rem;">▼</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 2.5rem; align-items: stretch; flex-wrap: wrap; margin-top: 0.5rem;">
+            <div style="flex: 0 0 250px; display: flex; flex-direction: column; justify-content: center; border-right: 1.5px solid rgba(255, 255, 255, 0.12); padding-right: 2.5rem; min-width: 200px;">
+              <div>
+                <h3 id="wod-expanded-word" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: #FFFFFF; line-height: 1.1; margin: 0;">—</h3>
+                <p style="font-size: 0.8rem; color: #e4a959; margin-top: 0.4rem; font-weight: bold;" id="dailyPronun">/ — /</p>
+                <p style="font-size: 0.78rem; font-style: italic; color: rgba(255, 255, 255, 0.6); margin-top: 0.2rem;" id="dailyPos">noun</p>
+              </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: space-between; gap: 1.2rem;">
+              <div>
+                <p id="dailyDef" style="font-size: 1rem; color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin-bottom: 1rem;">—</p>
+                
+                <div style="border-left: 3px solid rgba(228, 169, 89, 0.3); padding-left: 1rem; margin-bottom: 1rem;">
+                  <span style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #e4a959; margin-bottom: 0.2rem;">Example:</span>
+                  <p id="dailyExample" style="font-size: 0.88rem; font-style: italic; color: rgba(255, 255, 255, 0.75); line-height: 1.5; margin: 0;">—</p>
+                </div>
+              </div>
+              
+              <div class="btn-row" style="justify-content: flex-start; gap: 0.8rem; margin-top: auto;">
+                <button class="btn btn-sm" onclick="markDailyLearned(event)" style="background: #e4a959; color: #1e1e1e; font-weight: 700; border: none; border-radius: 50px; padding: 0.4rem 1.2rem; cursor: pointer;">Mark Learned ✓</button>
+                <a id="dailyPracticeBtn" href="#" class="btn btn-sm btn-outline" style="border-color: rgba(255,255,255,0.4); color: #FFFFFF; font-weight: bold; border-radius: 50px; text-decoration: none; padding: 0.4rem 1.2rem; display: inline-flex; align-items: center; gap: 6px;">Practice 🎙️</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slot-machine-container">
+        <!-- Left Panel: Vocab Logos & Definition Cards -->
+        <div class="left-panel">
+            <div class="brand-title-wrap">
+                <h1 class="brand-title">Learn <span class="highlight">Vocab</span> ✨📖</h1>
+                <div class="subtitle-steps">
+                    <div class="step-item"><span class="step-num">1</span> Pull lever to get vocab</div>
+                    <div class="step-item"><span class="step-num">2</span> Set 30 sec timer</div>
+                    <div class="step-item"><span class="step-num">3</span> Use vocab in speech</div>
+                </div>
+            </div>
+
+            <!-- Vocabulary Card Display -->
+            <div class="vocab-card-display" id="vocabCardDisplay">
+                <div class="vocab-word-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                    <div class="vocab-word" id="vocabWord" style="font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--text);">Eloquence</div>
+                    <button class="vocab-speak-btn" id="vocabSpeakBtn" onclick="speakVocabWord()" aria-label="Hear pronunciation" style="background:none; border:1.5px solid var(--border); border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                    </button>
+                </div>
+                <div id="vocabPronun" style="font-size:0.85rem; font-style:italic; color:var(--muted); margin-bottom:0.5rem;">/ ˈel.ə.kwəns /</div>
+                <div class="vocab-pos" id="vocabPos" style="display:inline-block; font-size:0.78rem; font-style:italic; color:var(--muted); margin-bottom:0.75rem;">noun</div>
+                <div class="vocab-def" id="vocabDef" style="font-size:0.92rem; line-height:1.5; color:var(--text); margin-bottom:1rem;">The ability to express thoughts and ideas clearly, fluently, and persuasively in speech.</div>
+                
+                <div class="vocab-example-label" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--accent); margin-bottom:0.25rem;">Example sentence:</div>
+                <div class="vocab-example" id="vocabExample" style="font-size:0.85rem; font-style:italic; color:var(--muted); margin-bottom:1rem;">"Her eloquence in the debate left the audience spellbound."</div>
+                
+                <div class="vocab-angle-label" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--impromptu-gold); margin-bottom:0.25rem;">Speaking challenge:</div>
+                <div class="vocab-angle" id="vocabAngle" style="font-size:0.85rem; color:var(--text); line-height:1.5; margin-bottom:1.2rem;">Use this word in a 60-second story about someone who inspired you.</div>
+                
+                <div class="btn-row" style="justify-content:flex-start; margin-top:0.5rem;">
+                    <button class="btn btn-sm btn-primary" onclick="markLearned()">Mark Learned ✓</button>
+                </div>
+            </div>
+
+            <!-- Words Learned list in Left Panel -->
+            <div id="learned-section" style="width:100%; max-width:400px; margin-top:2rem; background:var(--card); border:1.5px solid var(--border); border-radius:16px; padding:1.5rem;">
+                <h3 style="font-family:'Playfair Display', serif; font-size:1.4rem; color:var(--text); margin-bottom:0.25rem;">Words Learned</h3>
+                <p style="font-size:0.8rem; color:var(--muted); margin-bottom:1rem;"><span id="learned-count">0</span> words collected</p>
+                <div id="learned-list" class="saved-list" style="max-height:200px; overflow-y:auto;">
+                  <p style="color:var(--muted); font-size:0.85rem; text-align:center; padding:1rem 0;">start spinning to collect words</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Filters, Slot Machine, Actions -->
+        <div class="right-panel">
+            <div class="dropdown-row">
+                <!-- Difficulty Dropdown -->
+                <div class="diff-dropdown" id="diffDropdown">
+                    <button class="diff-trigger" id="diffTrigger">
+                        <span class="diff-icon" id="diffIcon">📈</span>
+                        <span class="diff-label" id="diffLabel">Adaptive (Auto)</span>
+                        <span class="diff-chevron">▼</span>
+                    </button>
+                    <div class="diff-menu" id="diffMenu">
+                        <button class="diff-option selected" data-diff="adaptive" data-icon="📈" data-label="Adaptive (Auto)">
+                            <span class="diff-icon">📈</span> Adaptive (Auto)
+                            <span class="diff-check">✓</span>
+                        </button>
+                        <button class="diff-option" data-diff="beginner" data-icon="🟢" data-label="Easy">
+                            <span class="diff-icon">🟢</span> Easy
+                            <span class="diff-check">✓</span>
+                        </button>
+                        <button class="diff-option" data-diff="intermediate" data-icon="🟡" data-label="Medium">
+                            <span class="diff-icon">🟡</span> Medium
+                            <span class="diff-check">✓</span>
+                        </button>
+                        <button class="diff-option" data-diff="advanced" data-icon="🔴" data-label="Hard">
+                            <span class="diff-icon">🔴</span> Hard
+                            <span class="diff-check">✓</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slot Machine Assembly -->
+            <div class="reel-assembly">
+                <div class="topic-col">
+                    <div class="topic-window" id="topicWindow">
+                        <div class="reel-strip" id="reelStrip"></div>
+                        <div class="reel-center-line" id="centerLine"></div>
+                    </div>
+                    <div class="desktop-btn-row">
+                        <button class="spin-btn-desktop" id="desktopSpinBtn">Spin!</button>
+                        <a href="timer.html" class="timer-btn-desktop" id="desktopTimerBtn" style="margin-left:8px; pointer-events:none; opacity:0.5;">Start Timer &rarr;</a>
+                    </div>
+                </div>
+                <div class="slot-handle" aria-hidden="true">
+                    <img src="pull-lever.png" alt="Pull lever" class="pull-lever-hint" id="pullLeverHint">
+                    <div class="handle-arm" id="handleArm">
+                        <div class="handle-knob" id="handleKnob">
+                            <div class="handle-knob-grip"></div>
+                        </div>
+                        <div class="handle-shaft"></div>
+                    </div>
+                    <div class="handle-pivot"></div>
+                </div>
+            </div>
+
+            <div class="mobile-btn-row">
+                <button class="mobile-spin-btn" id="mobileSpinBtn">Spin!</button>
+                <a href="timer.html" class="timer-btn-mobile" id="mobileTimerBtn" style="pointer-events:none; opacity:0.5;">Timer</a>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+  <script>
+    // ── VOCAB DATA BANK (Fallback) ──────────────────────────────────
+    const wordBank = [
+      { word:'Eloquence',    pos:'noun',      pronun:'/ ˈel.ə.kwəns /',       meaning:'The ability to express thoughts and ideas clearly, fluently, and persuasively — particularly in speech.',           example:'"Her eloquence in the debate left the audience spellbound, each word chosen with quiet precision."', challenge:'Use this word in a 60-second story about someone who inspired you.' },
+      { word:'Articulate',   pos:'adjective', pronun:'/ ɑːˈtɪk.jʊ.lɪt /',     meaning:'Having or showing the ability to speak fluently and coherently; expressing ideas clearly and effectively.',       example:'"The most articulate candidate won over voters not with promises alone, but with clarity."', challenge:'Describe a topic you feel passionate about — be as articulate as possible.' },
+      { word:'Poise',        pos:'noun',      pronun:'/ pɔɪz /',               meaning:'Graceful and elegant bearing in a person; a state of balance and self-confidence especially under pressure.',     example:'"Despite the unexpected question, she answered with remarkable poise and calm."', challenge:'Speak for 45 seconds about a challenge you handled with poise.' },
+      { word:'Candour',      pos:'noun',      pronun:'/ ˈkæn.dər /',           meaning:'The quality of being open, honest, and straightforward in expression, especially when discussing difficult topics.',example:'"His candour during the interview was refreshing; he acknowledged mistakes without deflection."', challenge:'Share a candid opinion about something you usually keep to yourself.' },
+      { word:'Rhetoric',     pos:'noun',      pronun:'/ ˈret.ər.ɪk /',         meaning:'The art of effective or persuasive speaking or writing, using language that has a powerful effect on its audience.',example:'"The politician\'s rhetoric was compelling, but critics urged the public to look beyond the words."', challenge:'Give a short persuasive speech on a topic you care about — focus on rhetoric.' },
+      { word:'Gravitas',     pos:'noun',      pronun:'/ ˈɡræv.ɪ.tæs /',        meaning:'Dignity, seriousness, and a sense of weight and importance in a person, especially in their manner of speaking.',example:'"The CEO spoke with gravitas, and the entire boardroom fell attentive."', challenge:'Speak about a serious topic using a measured, weighty tone.' },
+      { word:'Lucid',        pos:'adjective', pronun:'/ ˈluː.sɪd /',            meaning:'Clear, coherent, and easy to understand; expressed in a way that leaves no confusion.',                          example:'"Her lucid explanation of the complex theory made it accessible to everyone in the room."', challenge:'Explain a technical concept to a non-expert as lucidly as possible.' },
+      { word:'Verbose',      pos:'adjective', pronun:'/ vɜːˈboʊs /',            meaning:'Using more words than necessary; excessively wordy in speech or writing.',                                        example:'"His answer was verbose and wandering — the audience lost the point halfway through."', challenge:'Restate a complex idea you know in exactly 30 words — no more, no less.' },
+      { word:'Enunciate',    pos:'verb',      pronun:'/ ɪˈnʌn.si.eɪt /',        meaning:'To pronounce words clearly and distinctly; to articulate each sound with precision.',                            example:'"A good speaker enunciates clearly, ensuring every person in the room can follow along."', challenge:'Speak a complex paragraph at half speed, fully enunciating each syllable.' },
+      { word:'Conviction',   pos:'noun',      pronun:'/ kənˈvɪk.ʃən /',         meaning:'A firmly held belief or opinion; the quality of speaking with certainty and passion that convinces others.',    example:'"She spoke with such conviction that even the sceptics began to reconsider their position."', challenge:'Argue a position you genuinely believe — let your conviction show.' },
+      { word:'Intonation',   pos:'noun',      pronun:'/ ˌɪn.təˈneɪ.ʃən /',      meaning:'The rise and fall of the voice in speaking; the way pitch varies to convey meaning and emotion.',              example:'"Mastering intonation is what separates a monotone speaker from a captivating one."', challenge:'Read the same sentence with three different intonations — curious, assertive, and warm.' },
+      { word:'Cadence',      pos:'noun',      pronun:'/ ˈkeɪ.dəns /',            meaning:'The rhythmic flow of a sequence of sounds or words; the beat and tempo of speech.',                             example:'"Her speech had a natural cadence that made it almost musical to listen to."', challenge:'Deliver a 90-second monologue — pay deliberate attention to your cadence.' },
+      { word:'Brevity',      pos:'noun',      pronun:'/ ˈbrev.ɪ.ti /',           meaning:'The quality of expressing something in a concise and brief way without losing meaning.',                         example:'"Shakespeare understood brevity; his most powerful lines are often his shortest."', challenge:'Summarise your life philosophy in under 60 seconds using brevity as a virtue.' },
+      { word:'Affable',      pos:'adjective', pronun:'/ ˈæf.ə.bəl /',            meaning:'Friendly, easy to talk to, and pleasant in manner; approachable and warm in conversation.',                     example:'"His affable personality made him a natural presenter — people simply enjoyed listening to him."', challenge:'Introduce yourself as if meeting someone new — be warm and affable.' },
+      { word:'Synergy',      pos:'noun',      pronun:'/ ˈsɪn.ər.dʒi /',          meaning:'The interaction of multiple elements producing an effect greater than the sum of their individual effects.',    example:'"The synergy between the two speakers created an electrifying exchange."', challenge:'Describe a collaboration you were part of — explain the synergy that made it work.' }
+    ];
+
+    const wordBankByDifficulty = {
+      beginner: ['Eloquence', 'Articulate', 'Poise', 'Candour', 'Affable'],
+      intermediate: ['Rhetoric', 'Gravitas', 'Lucid', 'Conviction', 'Intonation'],
+      advanced: ['Verbose', 'Cadence', 'Brevity', 'Enunciate', 'Synergy']
+    };
+
+    // State
+    var currentDifficulty = 'adaptive';
+    var activeTopics = [];
+    var currentWordObj = null;
+    var isSpinning = false;
+    var lastWordIndex = -1;
+    var animFrameId = null;
+    var learnedWords = JSON.parse(localStorage.getItem('otm_learned_words') || '[]');
+
+    function getAdaptiveDifficulty() {
+      const count = learnedWords.length;
+      if (count >= 10) return 'advanced';
+      if (count >= 5) return 'intermediate';
+      return 'beginner';
+    }
+
+    function getMergedWordPool() {
+      let diff = currentDifficulty;
+      if (diff === 'adaptive') {
+        diff = getAdaptiveDifficulty();
+      }
+      
+      const pool = wordBankByDifficulty[diff] || wordBank.map(w => w.word);
+      const unlearned = pool.filter(w => !learnedWords.includes(w));
+      
+      if (unlearned.length === 0) {
+        // If all words in active tier are learned, check other tiers
+        const allUnlearned = wordBank.map(w => w.word).filter(w => !learnedWords.includes(w));
+        if (allUnlearned.length > 0) {
+          return allUnlearned;
+        }
+        // If all words across all tiers are learned, return all words in active tier
+        return pool;
+      }
+      return unlearned;
+    }
+
+    function updateAdaptiveDropdownLabel() {
+      if (currentDifficulty === 'adaptive') {
+        const activeLevel = getAdaptiveDifficulty();
+        const labelMap = { beginner: 'Easy 🟢', intermediate: 'Medium 🟡', advanced: 'Hard 🔴' };
+        document.getElementById('diffLabel').textContent = `Adaptive (${labelMap[activeLevel]})`;
+        document.getElementById('diffIcon').textContent = '📈';
+      }
+    }
+
+    // --- Web Audio API Chimes ---
+    let audioCtx = null;
+    function ensureAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playTick(progress) {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        const freq = 1800 - progress * 900;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.6, now + 0.04);
+
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(2500, now);
+        filter.Q.setValueAtTime(2, now);
+
+        const volume = 0.08 + (1 - progress) * 0.06;
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+    }
+
+    function playLand() {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, now);
+        gain1.gain.setValueAtTime(0.15, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.65);
+
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1320, now + 0.06);
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(0.1, now + 0.06);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.55);
+    }
+
+    function playHandleClunk() {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+        const bufferSize = audioCtx.sampleRate * 0.05;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(600, now);
+        filter.Q.setValueAtTime(1, now);
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+        noise.stop(now + 0.06);
+    }
+
+    // --- Slot Machine Physics ---
+    function getItemHeight() {
+        if (window.innerWidth <= 480) return 100;
+        if (window.innerWidth <= 768) return 120;
+        return 130;
+    }
+
+    function shuffleArray(arr) {
+        const shuffled = arr.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    function fitTextToWidth(items, containerWidth) {
+        var w = window.innerWidth;
+        var maxFontSize = w <= 480 ? 1.6 : (w <= 768 ? 2.0 : 3.5);
+        var minFontSize = w <= 480 ? 0.8 : (w <= 768 ? 1.0 : 1.2);
+        var wrapThreshold = w <= 480 ? 10 : (w <= 768 ? 12 : 15);
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var text = item.textContent;
+            if (text.length > wrapThreshold) {
+                var mid = Math.floor(text.length / 2);
+                var bestBreak = text.indexOf(' ', mid);
+                if (bestBreak === -1) bestBreak = text.lastIndexOf(' ', mid);
+                if (bestBreak > 0) {
+                    item.innerHTML = text.substring(0, bestBreak) + '<br>' + text.substring(bestBreak + 1);
+                }
+                item.style.fontSize = (maxFontSize * 0.55) + 'rem';
+                item.style.lineHeight = '1.15';
+            } else {
+                item.style.fontSize = maxFontSize + 'rem';
+            }
+            if (item.scrollWidth > containerWidth) {
+                var size = parseFloat(item.style.fontSize);
+                while (size > minFontSize && item.scrollWidth > containerWidth) {
+                    size -= 0.1;
+                    item.style.fontSize = size + 'rem';
+                }
+            }
+        }
+    }
+
+    async function triggerSpin(velocityOverride) {
+      if (isSpinning) return;
+
+      isSpinning = true;
+      document.getElementById('desktopSpinBtn').disabled = true;
+      document.getElementById('mobileSpinBtn').disabled = true;
+      
+      let timerBtnDesktop = document.getElementById('desktopTimerBtn');
+      let timerBtnMobile = document.getElementById('mobileTimerBtn');
+      timerBtnDesktop.style.pointerEvents = 'none';
+      timerBtnDesktop.style.opacity = '0.5';
+      timerBtnMobile.style.pointerEvents = 'none';
+      timerBtnMobile.style.opacity = '0.5';
+
+      document.getElementById('vocabCardDisplay').classList.remove('visible');
+
+      let wordLandedObj = null;
+      try {
+        const lvl = currentDifficulty === 'random' ? 'intermediate' : currentDifficulty;
+        const data = await window.offTheMic.getVocab(lvl);
+        if (data && data.word) {
+          wordLandedObj = data;
+        }
+      } catch (err) {
+        console.warn('API getVocab failed, using local bank fallback:', err);
+      }
+
+      if (!wordLandedObj) {
+        // Fallback to local pool
+        const poolWords = getMergedWordPool();
+        const selectedWord = poolWords[Math.floor(Math.random() * poolWords.length)];
+        wordLandedObj = wordBank.find(w => w.word === selectedWord) || wordBank[0];
+      }
+
+      currentWordObj = wordLandedObj;
+      executeSpin(wordLandedObj.word, velocityOverride);
+    }
+
+    function executeSpin(wordLanded, initialVelocity) {
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        ensureAudioContext();
+
+        const reelStrip = document.getElementById('reelStrip');
+        const topicWindow = document.getElementById('topicWindow');
+        const handleArm = document.getElementById('handleArm');
+
+        if (handleArm) handleArm.classList.add('disabled');
+
+        const ITEM_HEIGHT = getItemHeight();
+        const WINDOW_HEIGHT = topicWindow.offsetHeight;
+
+        const INITIAL_VELOCITY = initialVelocity || 55;
+        const FRICTION = 0.93;
+        const STOP_THRESHOLD = 1.5;
+
+        let simVel = INITIAL_VELOCITY;
+        let simDist = 0;
+        while (simVel >= STOP_THRESHOLD) {
+            simDist += simVel;
+            simVel *= FRICTION;
+        }
+
+        const centerAtStop = simDist + WINDOW_HEIGHT / 2;
+        const naturalIndex = Math.round((centerAtStop - ITEM_HEIGHT / 2) / ITEM_HEIGHT);
+        const LANDING_INDEX = naturalIndex + 1;
+        const REEL_COUNT = LANDING_INDEX + 3;
+
+        let reelWords = [];
+        const pool = getMergedWordPool();
+        while (reelWords.length < REEL_COUNT) {
+            reelWords = reelWords.concat(shuffleArray(pool));
+        }
+        reelWords = reelWords.slice(0, REEL_COUNT);
+        reelWords[LANDING_INDEX] = wordLanded;
+
+        const TARGET_Y = -(LANDING_INDEX * ITEM_HEIGHT + ITEM_HEIGHT / 2 - WINDOW_HEIGHT / 2);
+
+        reelStrip.innerHTML = '';
+        reelStrip.classList.remove('settled');
+        reelStrip.style.transform = 'translateY(0px)';
+        
+        reelWords.forEach(function(word, i) {
+            const div = document.createElement('div');
+            div.className = 'reel-item';
+            div.style.height = ITEM_HEIGHT + 'px';
+            div.textContent = word;
+            if (i === LANDING_INDEX) {
+                div.setAttribute('data-landing', 'true');
+            }
+            reelStrip.appendChild(div);
+        });
+
+        fitTextToWidth(reelStrip.children, topicWindow.offsetWidth - 32);
+
+        function styleItemsByPosition(currentY) {
+            var viewportCenter = WINDOW_HEIGHT / 2;
+            var items = reelStrip.children;
+            for (var i = 0; i < items.length; i++) {
+                var itemCenter = i * ITEM_HEIGHT + ITEM_HEIGHT / 2 + currentY;
+                var dist = Math.abs(itemCenter - viewportCenter);
+                var norm = Math.min(dist / ITEM_HEIGHT, 1);
+                var scale = 1.6 - norm * 0.6;
+                var opacity = 1 - norm * 0.7;
+                items[i].style.transform = 'scale(' + scale + ')';
+                items[i].style.opacity = opacity;
+            }
+        }
+
+        let position = 0;
+        let velocity = INITIAL_VELOCITY;
+        let lastBoundaryIndex = 0;
+        let lastFrameTime = null;
+
+        function animate(timestamp) {
+            if (lastFrameTime === null) lastFrameTime = timestamp;
+            var rawDt = (timestamp - lastFrameTime) / 16.667;
+            var dt = Math.min(rawDt, 3);
+            lastFrameTime = timestamp;
+
+            if (dt === 0) {
+                animFrameId = requestAnimationFrame(animate);
+                return;
+            }
+
+            position += velocity * dt;
+            velocity *= Math.pow(FRICTION, dt);
+
+            reelStrip.style.transform = 'translateY(' + (-position) + 'px)';
+            styleItemsByPosition(-position);
+
+            var currentBoundaryIndex = Math.floor(position / ITEM_HEIGHT);
+            if (currentBoundaryIndex > lastBoundaryIndex) {
+                var progress = 1 - (velocity / INITIAL_VELOCITY);
+                playTick(Math.min(progress, 0.95));
+                lastBoundaryIndex = currentBoundaryIndex;
+            }
+
+            if (velocity < STOP_THRESHOLD) {
+                snapToTarget();
+                return;
+            }
+
+            animFrameId = requestAnimationFrame(animate);
+        }
+
+        function snapToTarget() {
+            var startY = -position;
+            var distance = TARGET_Y - startY;
+            var startTime = performance.now();
+            var duration = 280;
+
+            function springAnimate(now) {
+                var elapsed = now - startTime;
+                var t = Math.min(elapsed / duration, 1);
+                var spring = 1 - Math.exp(-7 * t) * Math.cos(5 * t);
+                var y = startY + distance * spring;
+
+                reelStrip.style.transform = 'translateY(' + y + 'px)';
+                styleItemsByPosition(y);
+
+                if (t < 1) {
+                    animFrameId = requestAnimationFrame(springAnimate);
+                } else {
+                    reelStrip.style.transform = 'translateY(' + TARGET_Y + 'px)';
+                    onSettleComplete();
+                }
+            }
+            animFrameId = requestAnimationFrame(springAnimate);
+        }
+
+        function onSettleComplete() {
+            reelStrip.classList.add('settled');
+            var landingItem = reelStrip.querySelector('[data-landing="true"]');
+            if (landingItem) {
+                landingItem.classList.add('landed');
+
+                // Display word details card
+                document.getElementById('vocabWord').textContent = currentWordObj.word;
+                document.getElementById('vocabPos').textContent = currentWordObj.pos || 'noun';
+                document.getElementById('vocabPronun').textContent = currentWordObj.pronunciation || currentWordObj.pronun || '';
+                document.getElementById('vocabDef').textContent = currentWordObj.meaning;
+                document.getElementById('vocabExample').textContent = currentWordObj.example;
+                document.getElementById('vocabAngle').textContent = currentWordObj.challenge || 'Use this word in a 30-second speech.';
+
+                var cardDisplay = document.getElementById('vocabCardDisplay');
+                cardDisplay.classList.add('visible');
+
+                // Enable Timer Link (30 seconds duration for vocab challenge)
+                var timerUrl = 'timer.html?topic=Use ' + encodeURIComponent(currentWordObj.word.toLowerCase()) + ' in a speech&duration=30';
+                
+                let timerBtnDesktop = document.getElementById('desktopTimerBtn');
+                let timerBtnMobile = document.getElementById('mobileTimerBtn');
+                
+                timerBtnDesktop.href = timerUrl;
+                timerBtnDesktop.style.pointerEvents = 'auto';
+                timerBtnDesktop.style.opacity = '1';
+                
+                timerBtnMobile.href = timerUrl;
+                timerBtnMobile.style.pointerEvents = 'auto';
+                timerBtnMobile.style.opacity = '1';
+            }
+
+            playLand();
+            if (handleArm) handleArm.classList.remove('disabled');
+            document.getElementById('desktopSpinBtn').disabled = false;
+            document.getElementById('mobileSpinBtn').disabled = false;
+            isSpinning = false;
+        }
+
+        animFrameId = requestAnimationFrame(animate);
+    }
+
+    // --- Pronounce SpeechSynthesis ---
+    function speakVocabWord() {
+        if (!currentWordObj || !currentWordObj.word) return;
+        window.speechSynthesis.cancel();
+        var utter = new SpeechSynthesisUtterance(currentWordObj.word);
+        utter.lang = 'en-US';
+        utter.rate = 0.9;
+        window.speechSynthesis.speak(utter);
+    }
+
+    // --- Lever setup ---
+    (function initLever() {
+        const arm = document.getElementById('handleArm');
+        const knob = document.getElementById('handleKnob');
+        if (!arm || !knob) return;
+
+        const MAX_ANGLE = 180;
+        const DRAG_SENSITIVITY = 280;
+
+        arm.classList.add('hint');
+        arm.addEventListener('animationend', function() {
+            arm.classList.remove('hint');
+        }, { once: true });
+
+        let isDragging = false;
+        let startY = 0;
+        let currentAngle = 0;
+        let hasMoved = false;
+
+        function onPointerMove(e) {
+            if (!isDragging) return;
+
+            var deltaY = Math.max(0, e.clientY - startY);
+            if (deltaY > 3) hasMoved = true;
+            currentAngle = Math.min(deltaY * (MAX_ANGLE / DRAG_SENSITIVITY), MAX_ANGLE);
+
+            arm.style.transform = 'rotate(' + currentAngle + 'deg)';
+
+            var progress = currentAngle / MAX_ANGLE;
+            var shadowBlur = 6 + progress * 14;
+            var shadowY = 2 + progress * 6;
+            knob.style.boxShadow = '0 ' + shadowY + 'px ' + shadowBlur + 'px rgba(26, 60, 52, ' + (0.2 + progress * 0.2) + ')';
+        }
+
+        function onPointerUp(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            arm.classList.remove('grabbing');
+
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
+
+            var normalizedPull = currentAngle / MAX_ANGLE;
+
+            knob.style.boxShadow = '';
+            arm.classList.add('spring-back');
+            arm.style.transform = 'rotate(0deg)';
+            setTimeout(function() {
+                arm.classList.remove('spring-back');
+            }, 600);
+
+            if (hasMoved || currentAngle > 0) {
+                playHandleClunk();
+                var mappedVelocity = 20 + Math.min(normalizedPull, 1) * 35;
+                triggerSpin(mappedVelocity);
+            } else {
+                playHandleClunk();
+                triggerSpin(25);
+            }
+
+            currentAngle = 0;
+            hasMoved = false;
+        }
+
+        knob.addEventListener('pointerdown', function(e) {
+            if (isSpinning) return;
+            if (arm.classList.contains('disabled')) return;
+
+            e.preventDefault();
+            isDragging = true;
+            hasMoved = false;
+            arm.classList.add('grabbing');
+            arm.classList.remove('hint', 'spring-back');
+            arm.style.transition = '';
+            var pullHint = document.getElementById('pullLeverHint');
+            if (pullHint) pullHint.classList.add('hidden');
+
+            startY = e.clientY;
+            currentAngle = 0;
+
+            ensureAudioContext();
+
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
+            window.addEventListener('pointercancel', onPointerUp);
+        });
+    })();
+
+    // --- Dropdowns Bindings ---
+    (function initDifficultyDropdown() {
+      const dropdown = document.getElementById('diffDropdown');
+      const trigger = document.getElementById('diffTrigger');
+      const menu = document.getElementById('diffMenu');
+
+      trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdown.classList.toggle('open');
+      });
+
+      menu.addEventListener('click', function(e) {
+          const option = e.target.closest('.diff-option');
+          if (!option) return;
+          
+          const diff = option.getAttribute('data-diff');
+          currentDifficulty = diff;
+          
+          document.querySelectorAll('#diffMenu .diff-option').forEach(o => o.classList.remove('selected'));
+          option.classList.add('selected');
+          
+          document.getElementById('diffIcon').textContent = option.getAttribute('data-icon');
+          document.getElementById('diffLabel').textContent = option.getAttribute('data-label');
+          
+          if (currentDifficulty === 'adaptive') {
+              updateAdaptiveDropdownLabel();
+          }
+          
+          activeTopics = getMergedWordPool();
+          dropdown.classList.remove('open');
+          
+          reinitReel();
+          document.getElementById('vocabCardDisplay').classList.remove('visible');
+      });
+
+      document.addEventListener('click', function() {
+          dropdown.classList.remove('open');
+      });
+    })();
+
+    function reinitReel() {
+        var reelStrip = document.getElementById('reelStrip');
+        var topicWindow = document.getElementById('topicWindow');
+        var ITEM_HEIGHT = getItemHeight();
+        var WINDOW_HEIGHT = topicWindow.offsetHeight;
+        var visibleCount = 3;
+
+        var pool = getMergedWordPool();
+        var initialWords = shuffleArray(pool).slice(0, visibleCount);
+
+        reelStrip.innerHTML = '';
+        reelStrip.classList.remove('settled');
+
+        initialWords.forEach(function(word) {
+            var div = document.createElement('div');
+            div.className = 'reel-item';
+            div.style.height = ITEM_HEIGHT + 'px';
+            div.textContent = word;
+            reelStrip.appendChild(div);
+        });
+
+        fitTextToWidth(reelStrip.children, topicWindow.offsetWidth - 32);
+
+        var middleIndex = 1;
+        var offsetY = -(middleIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2 - WINDOW_HEIGHT / 2);
+        reelStrip.style.transform = 'translateY(' + offsetY + 'px)';
+
+        reelStrip.classList.add('settled');
+        var centerItem = reelStrip.children[middleIndex];
+        if (centerItem) centerItem.classList.add('landed');
+    }
+
+    // --- Progress synchronization ---
+    async function syncLearnedWords() {
+      const user = JSON.parse(localStorage.getItem('otm_user') || 'null');
+      if (user && user.id) {
+        try {
+          const res = await apiGet(`/progress?user_id=${user.id}`);
+          if (res && res.success && res.learned_words) {
+            const merged = Array.from(new Set([...learnedWords, ...res.learned_words]));
+            learnedWords = merged;
+            localStorage.setItem('otm_learned_words', JSON.stringify(learnedWords));
+            renderLearned();
+          }
+        } catch (err) {
+          console.warn('Could not sync learned words with backend:', err);
+        }
+      }
+    }
+
+    async function markLearned() {
+      if (!currentWordObj) return;
+      const w = currentWordObj.word;
+      if (learnedWords.includes(w)) { showToast('Already in your collection!'); return; }
+      
+      const user = JSON.parse(localStorage.getItem('otm_user') || 'null');
+      if (user && user.id) {
+        try {
+          const data = await apiPost('/progress/save-word', {
+            user_id: user.id,
+            word: w
+          });
+          if (data && data.success) {
+            showToast(`"${w}" saved to cloud ✓`);
+          } else {
+            showToast(`"${w}" saved locally.`);
+          }
+        } catch (err) {
+          console.warn('Backend save-word failed:', err);
+          showToast(`"${w}" saved locally.`);
+        }
+      } else {
+        showToast(`"${w}" saved locally.`);
+      }
+
+      learnedWords.push(w);
+      localStorage.setItem('otm_learned_words', JSON.stringify(learnedWords));
+      renderLearned();
+      if (window.otm_triggerConfetti) window.otm_triggerConfetti();
+      if (window.otm_logActivity) window.otm_logActivity();
+    }
+
+    let currentDailyWordObj = null;
+    let wodExpanded = false;
+
+    function toggleWodCard() {
+      const banner = document.getElementById('word-of-the-day-banner');
+      const collapsed = document.getElementById('wod-collapsed-content');
+      const expanded = document.getElementById('wod-expanded-content');
+      const chevron = document.getElementById('wod-chevron');
+      
+      if (wodExpanded && (event.target.closest('button') || event.target.closest('a'))) {
+        return;
+      }
+
+      wodExpanded = !wodExpanded;
+      if (wodExpanded) {
+        banner.classList.add('expanded');
+        collapsed.style.opacity = '0';
+        chevron.style.transform = 'rotate(180deg)';
+        setTimeout(() => {
+          collapsed.style.display = 'none';
+          expanded.style.display = 'flex';
+          setTimeout(() => { expanded.style.opacity = '1'; }, 50);
+        }, 150);
+      } else {
+        banner.classList.remove('expanded');
+        expanded.style.opacity = '0';
+        chevron.style.transform = 'rotate(0deg)';
+        setTimeout(() => {
+          expanded.style.display = 'none';
+          collapsed.style.display = 'flex';
+          setTimeout(() => { collapsed.style.opacity = '1'; }, 50);
+        }, 150);
+      }
+    }
+
+    async function loadDailyWord() {
+      try {
+        const res = await apiGet('/word-of-day');
+        if (res && res.word) {
+          currentDailyWordObj = res;
+          document.getElementById('dailyWord').textContent = res.word;
+          document.getElementById('wod-expanded-word').textContent = res.word;
+          document.getElementById('wod-collapsed-meaning-preview').textContent = ` — ${res.meaning}`;
+          
+          document.getElementById('dailyPos').textContent = res.pos || 'noun';
+          document.getElementById('dailyPronun').textContent = res.pronunciation || res.pronun || '';
+          document.getElementById('dailyDef').textContent = res.meaning;
+          document.getElementById('dailyExample').textContent = res.example;
+          
+          document.getElementById('dailyPracticeBtn').href = `analysis.html?wod_challenge=true`;
+          document.getElementById('word-of-the-day-banner').style.display = 'block';
+        }
+      } catch (err) {
+        console.warn('Failed to load daily word of the day:', err);
+      }
+    }
+
+    function speakDailyWord() {
+      if (!currentDailyWordObj || !currentDailyWordObj.word) return;
+      window.speechSynthesis.cancel();
+      var utter = new SpeechSynthesisUtterance(currentDailyWordObj.word);
+      utter.lang = 'en-US';
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    }
+
+    async function markDailyLearned(e) {
+      if (e) e.stopPropagation();
+      if (!currentDailyWordObj) return;
+      const w = currentDailyWordObj.word;
+      if (learnedWords.includes(w)) { showToast('Already in your collection!'); return; }
+      
+      const user = JSON.parse(localStorage.getItem('otm_user') || 'null');
+      if (user && user.id) {
+        try {
+          const data = await apiPost('/progress/save-word', {
+            user_id: user.id,
+            word: w
+          });
+          if (data && data.success) {
+            showToast(`"${w}" saved to cloud ✓`);
+          } else {
+            showToast(`"${w}" saved locally.`);
+          }
+        } catch (err) {
+          console.warn('Backend save-word failed:', err);
+          showToast(`"${w}" saved locally.`);
+        }
+      } else {
+        showToast(`"${w}" saved locally.`);
+      }
+
+      learnedWords.push(w);
+      localStorage.setItem('otm_learned_words', JSON.stringify(learnedWords));
+      renderLearned();
+      if (window.otm_triggerConfetti) window.otm_triggerConfetti();
+      if (window.otm_logActivity) window.otm_logActivity();
+    }
+
+    function renderLearned() {
+      const list = document.getElementById('learned-list');
+      document.getElementById('learned-count').textContent = learnedWords.length;
+      updateAdaptiveDropdownLabel();
+      if (!learnedWords.length) {
+        list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem 0;">start marking words to build your collection</p>';
+        return;
+      }
+      list.innerHTML = learnedWords.map(w => `<div class="saved-item"><span>${w}</span><span class="topic-badge" style="background:rgba(15,44,89,0.1); color:var(--text);">learned</span></div>`).join('');
+    }
+
+    // Bind Spin Actions
+    document.getElementById('desktopSpinBtn').addEventListener('click', function() {
+        playHandleClunk();
+        triggerSpin(30);
+    });
+    document.getElementById('mobileSpinBtn').addEventListener('click', function() {
+        playHandleClunk();
+        triggerSpin(30);
+    });
+
+    window.addEventListener('resize', reinitReel);
+
+    // Initialise
+    reinitReel();
+    renderLearned();
+    syncLearnedWords();
+    loadDailyWord();
+  </script>
+</body>
+</html>

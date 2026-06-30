@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Topics — Off The Mic</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Scope navbar adjustments for slot machine pages */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: var(--bg) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .page-wrapper {
+      padding-top: 100px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body class="page-topics">
+  <nav>
+    <a href="dashboard.html" class="nav-brand">Off The Mic</a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="vocab.html">Vocab</a></li>
+      <li><a href="analysis.html">Analysis</a></li>
+      <li><a href="interview.html">Interview</a></li>
+      <li><a href="progress.html">Progress</a></li>
+    </ul>
+    <a href="login.html" class="btn btn-outline btn-sm" id="logout-link">Log out</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <!-- Mode Tab Bar -->
+    <div class="tab-bar" id="tabBar">
+        <a href="interview.html" class="tab-btn" style="text-decoration:none;">Interview Prep</a>
+        <a href="vocab.html" class="tab-btn" style="text-decoration:none;">Learn Vocab</a>
+    </div>
+
+    <div class="slot-machine-container">
+        <!-- Left Panel: Logos and Saved Topics -->
+        <div class="left-panel">
+            <div class="brand-title-wrap">
+                <h1 class="brand-title">Off the <span class="highlight">Mic</span></h1>
+                <div class="subtitle-steps">
+                    <div class="step-item"><span class="step-num">1</span> Pull lever to get topic</div>
+                    <div class="step-item"><span class="step-num">2</span> Set 1 min timer</div>
+                    <div class="step-item"><span class="step-num">3</span> Record & speak</div>
+                </div>
+            </div>
+            <a href="analysis.html" class="speech-analysis-btn flash" id="speechAnalysisBtn">GET SPEECH ANALYSIS<span class="speech-analysis-new-badge">NEW</span></a>
+            
+            <!-- Saved Topics List inside Left Panel -->
+            <div id="saved-section" style="width:100%; max-width:400px; margin-top:2rem; background:var(--card); border:1.5px solid var(--border); border-radius:16px; padding:1.5rem;">
+                <h3 style="font-family:'Playfair Display', serif; font-size:1.4rem; color:var(--text); margin-bottom:0.25rem;">Saved Topics</h3>
+                <p style="font-size:0.8rem; color:var(--muted); margin-bottom:1rem;">Topics saved for practice</p>
+                <div class="saved-list" id="saved-list" style="max-height:220px; overflow-y:auto;">
+                  <p style="color:var(--muted); font-size:0.85rem; text-align:center; padding:1rem 0;">no saved topics yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Filters and Slot Machine -->
+        <div class="right-panel">
+            <div class="dropdown-row">
+                <!-- Category Dropdown -->
+                <div class="cat-dropdown" id="catDropdown">
+                    <button class="cat-trigger" id="catTrigger">
+                        <span class="cat-icon" id="catIcon">🎯</span>
+                        <span class="cat-label" id="catLabel">Random</span>
+                        <span class="cat-chevron">▼</span>
+                    </button>
+                    <div class="cat-menu" id="catMenu">
+                        <button class="cat-option selected" data-cat="random" data-icon="🎯" data-label="Random">
+                            <span class="cat-icon">🎯</span> Random
+                            <span class="cat-check">✓</span>
+                        </button>
+                        <button class="cat-option" data-cat="technology" data-icon="💻" data-label="Technology">
+                            <span class="cat-icon">💻</span> Technology
+                            <span class="cat-check">✓</span>
+                        </button>
+                        <button class="cat-option" data-cat="ai" data-icon="🤖" data-label="Artificial Intelligence">
+                            <span class="cat-icon">🤖</span> AI
+                            <span class="cat-check">✓</span>
+                        </button>
+                        <button class="cat-option" data-cat="debate" data-icon="💬" data-label="Debate">
+                            <span class="cat-icon">💬</span> Debate
+                            <span class="cat-check">✓</span>
+                        </button>
+                        <button class="cat-option" data-cat="social" data-icon="👥" data-label="Social Issues">
+                            <span class="cat-icon">👥</span> Social Issues
+                            <span class="cat-check">✓</span>
+                        </button>
+                        <button class="cat-option" data-cat="college" data-icon="🎓" data-label="College Life">
+                            <span class="cat-icon">🎓</span> College Life
+                            <span class="cat-check">✓</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Difficulty Dropdown -->
+                <div class="diff-dropdown" id="diffDropdown">
+                    <button class="diff-trigger" id="diffTrigger">
+                        <span class="diff-icon" id="diffIcon">🎲</span>
+                        <span class="diff-label" id="diffLabel">Random</span>
+                        <span class="diff-chevron">▼</span>
+                    </button>
+                    <div class="diff-menu" id="diffMenu">
+                        <button class="diff-option selected" data-diff="random" data-icon="🎲" data-label="Random">
+                            <span class="diff-icon">🎲</span> Random
+                            <span class="diff-check">✓</span>
+                        </button>
+                        <button class="diff-option" data-diff="beginner" data-icon="🟢" data-label="Easy">
+                            <span class="diff-icon">🟢</span> Easy
+                            <span class="diff-check">✓</span>
+                        </button>
+                        <button class="diff-option" data-diff="intermediate" data-icon="🟡" data-label="Medium">
+                            <span class="diff-icon">🟡</span> Medium
+                            <span class="diff-check">✓</span>
+                        </button>
+                        <button class="diff-option" data-diff="advanced" data-icon="🔴" data-label="Hard">
+                            <span class="diff-icon">🔴</span> Hard
+                            <span class="diff-check">✓</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slot Machine Assembly -->
+            <div class="reel-assembly">
+                <div class="topic-col">
+                    <div class="topic-window" id="topicWindow">
+                        <div class="reel-strip" id="reelStrip"></div>
+                        <div class="reel-center-line" id="centerLine"></div>
+                    </div>
+                    <div class="desktop-btn-row">
+                        <button class="spin-btn-desktop" id="desktopSpinBtn">Spin!</button>
+                        <button class="spin-btn-desktop" id="desktopSaveBtn" onclick="saveTopic()" style="background:transparent; color:var(--text); margin-left:8px;" disabled>Save</button>
+                        <a href="timer.html" class="timer-btn-desktop" id="desktopTimerBtn" style="margin-left:8px; pointer-events:none; opacity:0.5;">Start Timer &rarr;</a>
+                    </div>
+                </div>
+                <div class="slot-handle" aria-hidden="true">
+                    <img src="pull-lever.png" alt="Pull lever" class="pull-lever-hint" id="pullLeverHint">
+                    <div class="handle-arm" id="handleArm">
+                        <div class="handle-knob" id="handleKnob">
+                            <div class="handle-knob-grip"></div>
+                        </div>
+                        <div class="handle-shaft"></div>
+                    </div>
+                    <div class="handle-pivot"></div>
+                </div>
+            </div>
+
+            <div class="mobile-btn-row">
+                <button class="mobile-spin-btn" id="mobileSpinBtn">Spin!</button>
+                <a href="timer.html" class="timer-btn-mobile" id="mobileTimerBtn" style="pointer-events:none; opacity:0.5;">Timer</a>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+  <script>
+    // ── TOPIC DATA BANK (Fallback) ──────────────────────────────────
+    const topicBank = {
+      technology: {
+        beginner:      ["Should everyone learn to code?","Is social media helpful or harmful for teens?","Are smartphones making us less social?","Should schools ban phones in class?","Do you prefer reading books or using apps to learn?"],
+        intermediate:  ["How will automation change the job market in the next decade?","Is the convenience of smart home devices worth the privacy trade-off?","Should tech companies be responsible for the content users post?","How has technology changed the way we form relationships?","Can AI ever truly replace human creativity?"],
+        advanced:      ["Evaluate the ethical implications of mass surveillance under the guise of national security.","To what extent should governments regulate algorithmic decision-making in public services?","Is the open-source movement sustainable in a monopolistic tech landscape?","How does digital colonialism perpetuate global inequality?","Argue for or against the idea that the metaverse will fragment rather than connect society."]
+      },
+      ai: {
+        beginner:      ["What is artificial intelligence in simple words?","Should AI be allowed to make art?","Can a robot be your friend?","Do you trust AI recommendations?","What would you ask an AI if you could ask anything?"],
+        intermediate:  ["Is AI bias a technical problem or a societal one?","Should AI-generated content be labelled?","How might AI change the way doctors diagnose illness?","What jobs do you think AI will never be able to do?","Does AI make education more or less equitable?"],
+        advanced:      ["Critically assess whether large language models constitute a form of understanding or sophisticated pattern matching.","Should sentient AI have legal rights?","How should liability be assigned when autonomous AI systems cause harm?","Is the race to AGI a net positive for humanity?","Analyse the tension between AI transparency and proprietary competitive advantage."]
+      },
+      debate: {
+        beginner:      ["Should school uniforms be mandatory?","Is homework necessary?","Should junk food be banned in schools?","Should voting age be lowered to 16?","Are zoos ethical?"],
+        intermediate:  ["Should social media platforms be classified as public utilities?","Is cancel culture a force for good or harm?","Should college education be free for everyone?","Is remote work better than office work?","Should extreme sports be banned?"],
+        advanced:      ["Resolved: Universal basic income is the most effective response to technological unemployment.","The right to free speech must be balanced against the duty to prevent harm — discuss.","Is civil disobedience ever morally justified?","Evaluate the claim that meritocracy is a myth that perpetuates inequality.","Resolved: Economic growth and environmental sustainability are fundamentally incompatible."]
+      },
+      social: {
+        beginner:      ["What does community mean to you?","How can young people make a difference?","Is kindness a strength or a weakness?","What is the most important social issue facing your generation?","Should people speak out when they witness injustice?"],
+        intermediate:  ["How does social media amplify or reduce social inequality?","Is charity a sustainable solution to poverty?","How should mental health education be integrated into schools?","What role does privilege play in access to opportunity?","Can art be a tool for social change?"],
+        advanced:      ["To what extent does systemic racism persist in institutional structures today?","Analyse the relationship between economic precarity and political radicalisation.","Is the concept of meritocracy a barrier to genuine social mobility?","Evaluate whether humanitarian intervention is a form of neo-colonialism.","How should society balance individual liberty with collective responsibility during public health crises?"]
+      },
+      college: {
+        beginner:      ["What is the best thing about college life?","How do you manage your time as a student?","What has been your biggest challenge in college so far?","Is college friendship different from school friendship?","What skill do you wish you learned before college?"],
+        intermediate:  ["Does a college degree still guarantee career success?","How does social media affect mental health of college students?","Is student debt a personal responsibility or a systemic failure?","How important is extracurricular involvement for career prospects?","Should colleges provide mental health support as a core service?"],
+        advanced:      ["Critically examine whether the traditional university model is equipped for the 21st century workforce.","Is the commodification of higher education undermining its original purpose?","Analyse the impact of prestige culture in colleges on student well-being and ethics.","How does the lack of vocational education pathways disadvantage working-class students?","Should colleges be politically neutral institutions?"]
+      }
+    };
+
+    // --- State ---
+    var currentDifficulty = 'random';
+    var currentCategory = 'random';
+    var activeTopics = getMergedTopicPool();
+    var currentTopic = '';
+    var isSpinning = false;
+    var lastTopicIndex = -1;
+    var animFrameId = null;
+    var savedTopics = JSON.parse(localStorage.getItem('otm_saved_topics') || '[]');
+
+    function getMergedTopicPool() {
+      let pool = [];
+      const cats = currentCategory !== 'random' ? [currentCategory] : Object.keys(topicBank);
+      const diffs = currentDifficulty !== 'random' ? [currentDifficulty] : ['beginner', 'intermediate', 'advanced'];
+
+      cats.forEach(c => {
+        diffs.forEach(d => {
+          if (topicBank[c] && topicBank[c][d]) {
+            pool = pool.concat(topicBank[c][d]);
+          }
+        });
+      });
+
+      // Filter out saved topics
+      let unsaved = pool.filter(topic => !savedTopics.includes(topic));
+
+      if (unsaved.length === 0) {
+        return pool.length ? pool : ["What does it mean to speak with confidence?"];
+      }
+      return unsaved;
+    }
+
+    // --- Web Audio API Chimes ---
+    let audioCtx = null;
+    function ensureAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playTick(progress) {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        const freq = 1800 - progress * 900;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.6, now + 0.04);
+
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(2500, now);
+        filter.Q.setValueAtTime(2, now);
+
+        const volume = 0.08 + (1 - progress) * 0.06;
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+    }
+
+    function playLand() {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, now);
+        gain1.gain.setValueAtTime(0.15, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.65);
+
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1320, now + 0.06);
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(0.1, now + 0.06);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.55);
+    }
+
+    function playHandleClunk() {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+        const bufferSize = audioCtx.sampleRate * 0.05;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(600, now);
+        filter.Q.setValueAtTime(1, now);
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+        noise.stop(now + 0.06);
+    }
+
+    // --- Slot Machine Physics ---
+    function getItemHeight() {
+        if (window.innerWidth <= 480) return 100;
+        if (window.innerWidth <= 768) return 120;
+        return 130;
+    }
+
+    function shuffleArray(arr) {
+        const shuffled = arr.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    function fitTextToWidth(items, containerWidth) {
+        var w = window.innerWidth;
+        var maxFontSize = w <= 480 ? 1.6 : (w <= 768 ? 2.0 : 3.5);
+        var minFontSize = w <= 480 ? 0.8 : (w <= 768 ? 1.0 : 1.2);
+        var wrapThreshold = w <= 480 ? 10 : (w <= 768 ? 12 : 15);
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var text = item.textContent;
+            if (text.length > wrapThreshold) {
+                var mid = Math.floor(text.length / 2);
+                var bestBreak = text.indexOf(' ', mid);
+                if (bestBreak === -1) bestBreak = text.lastIndexOf(' ', mid);
+                if (bestBreak > 0) {
+                    item.innerHTML = text.substring(0, bestBreak) + '<br>' + text.substring(bestBreak + 1);
+                }
+                item.style.fontSize = (maxFontSize * 0.55) + 'rem';
+                item.style.lineHeight = '1.15';
+            } else {
+                item.style.fontSize = maxFontSize + 'rem';
+            }
+            if (item.scrollWidth > containerWidth) {
+                var size = parseFloat(item.style.fontSize);
+                while (size > minFontSize && item.scrollWidth > containerWidth) {
+                    size -= 0.1;
+                    item.style.fontSize = size + 'rem';
+                }
+            }
+        }
+    }
+
+    // Fetch the topic and start spinning
+    async function triggerSpin(velocityOverride) {
+      if (isSpinning) return;
+
+      // Lock buttons
+      isSpinning = true;
+      document.getElementById('desktopSpinBtn').disabled = true;
+      document.getElementById('desktopSaveBtn').disabled = true;
+      document.getElementById('mobileSpinBtn').disabled = true;
+      
+      let timerBtnDesktop = document.getElementById('desktopTimerBtn');
+      let timerBtnMobile = document.getElementById('mobileTimerBtn');
+      timerBtnDesktop.style.pointerEvents = 'none';
+      timerBtnDesktop.style.opacity = '0.5';
+      timerBtnMobile.style.pointerEvents = 'none';
+      timerBtnMobile.style.opacity = '0.5';
+
+      let topicLanded = '';
+      try {
+        // Fetch topic from backend API
+        const data = await window.offTheMic.generateTopic(
+          currentCategory === 'random' ? '' : currentCategory,
+          currentDifficulty === 'random' ? '' : currentDifficulty
+        );
+        if (data && data.topic) {
+          topicLanded = data.topic;
+        }
+      } catch (err) {
+        console.warn('API generate-topic failed, using local bank fallback:', err);
+      }
+
+      if (!topicLanded) {
+        // Fallback to local pool
+        const pool = getMergedTopicPool();
+        topicLanded = pool[Math.floor(Math.random() * pool.length)];
+      }
+
+      executeSpin(topicLanded, velocityOverride);
+    }
+
+    function executeSpin(topicLanded, initialVelocity) {
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        ensureAudioContext();
+
+        const reelStrip = document.getElementById('reelStrip');
+        const topicWindow = document.getElementById('topicWindow');
+        const handleArm = document.getElementById('handleArm');
+
+        if (handleArm) handleArm.classList.add('disabled');
+
+        const ITEM_HEIGHT = getItemHeight();
+        const WINDOW_HEIGHT = topicWindow.offsetHeight;
+
+        const INITIAL_VELOCITY = initialVelocity || 55;
+        const FRICTION = 0.93;
+        const STOP_THRESHOLD = 1.5;
+
+        let simVel = INITIAL_VELOCITY;
+        let simDist = 0;
+        while (simVel >= STOP_THRESHOLD) {
+            simDist += simVel;
+            simVel *= FRICTION;
+        }
+
+        const centerAtStop = simDist + WINDOW_HEIGHT / 2;
+        const naturalIndex = Math.round((centerAtStop - ITEM_HEIGHT / 2) / ITEM_HEIGHT);
+        const LANDING_INDEX = naturalIndex + 1;
+        const REEL_COUNT = LANDING_INDEX + 3;
+
+        let reelTopics = [];
+        const pool = getMergedTopicPool();
+        while (reelTopics.length < REEL_COUNT) {
+            reelTopics = reelTopics.concat(shuffleArray(pool));
+        }
+        reelTopics = reelTopics.slice(0, REEL_COUNT);
+        reelTopics[LANDING_INDEX] = topicLanded;
+
+        const TARGET_Y = -(LANDING_INDEX * ITEM_HEIGHT + ITEM_HEIGHT / 2 - WINDOW_HEIGHT / 2);
+
+        reelStrip.innerHTML = '';
+        reelStrip.classList.remove('settled');
+        reelStrip.style.transform = 'translateY(0px)';
+        
+        reelTopics.forEach(function(topic, i) {
+            const div = document.createElement('div');
+            div.className = 'reel-item';
+            div.style.height = ITEM_HEIGHT + 'px';
+            div.textContent = topic;
+            if (i === LANDING_INDEX) {
+                div.setAttribute('data-landing', 'true');
+            }
+            reelStrip.appendChild(div);
+        });
+
+        fitTextToWidth(reelStrip.children, topicWindow.offsetWidth - 32);
+
+        function styleItemsByPosition(currentY) {
+            var viewportCenter = WINDOW_HEIGHT / 2;
+            var items = reelStrip.children;
+            for (var i = 0; i < items.length; i++) {
+                var itemCenter = i * ITEM_HEIGHT + ITEM_HEIGHT / 2 + currentY;
+                var dist = Math.abs(itemCenter - viewportCenter);
+                var norm = Math.min(dist / ITEM_HEIGHT, 1);
+                var scale = 1.6 - norm * 0.6;
+                var opacity = 1 - norm * 0.7;
+                items[i].style.transform = 'scale(' + scale + ')';
+                items[i].style.opacity = opacity;
+            }
+        }
+
+        let position = 0;
+        let velocity = INITIAL_VELOCITY;
+        let lastBoundaryIndex = 0;
+        let lastFrameTime = null;
+
+        function animate(timestamp) {
+            if (lastFrameTime === null) lastFrameTime = timestamp;
+            var rawDt = (timestamp - lastFrameTime) / 16.667;
+            var dt = Math.min(rawDt, 3);
+            lastFrameTime = timestamp;
+
+            if (dt === 0) {
+                animFrameId = requestAnimationFrame(animate);
+                return;
+            }
+
+            position += velocity * dt;
+            velocity *= Math.pow(FRICTION, dt);
+
+            reelStrip.style.transform = 'translateY(' + (-position) + 'px)';
+            styleItemsByPosition(-position);
+
+            var currentBoundaryIndex = Math.floor(position / ITEM_HEIGHT);
+            if (currentBoundaryIndex > lastBoundaryIndex) {
+                var progress = 1 - (velocity / INITIAL_VELOCITY);
+                playTick(Math.min(progress, 0.95));
+                lastBoundaryIndex = currentBoundaryIndex;
+            }
+
+            if (velocity < STOP_THRESHOLD) {
+                snapToTarget();
+                return;
+            }
+
+            animFrameId = requestAnimationFrame(animate);
+        }
+
+        function snapToTarget() {
+            var startY = -position;
+            var distance = TARGET_Y - startY;
+            var startTime = performance.now();
+            var duration = 280;
+
+            function springAnimate(now) {
+                var elapsed = now - startTime;
+                var t = Math.min(elapsed / duration, 1);
+                var spring = 1 - Math.exp(-7 * t) * Math.cos(5 * t);
+                var y = startY + distance * spring;
+
+                reelStrip.style.transform = 'translateY(' + y + 'px)';
+                styleItemsByPosition(y);
+
+                if (t < 1) {
+                    animFrameId = requestAnimationFrame(springAnimate);
+                } else {
+                    reelStrip.style.transform = 'translateY(' + TARGET_Y + 'px)';
+                    onSettleComplete();
+                }
+            }
+            animFrameId = requestAnimationFrame(springAnimate);
+        }
+
+        function onSettleComplete() {
+            reelStrip.classList.add('settled');
+            var landingItem = reelStrip.querySelector('[data-landing="true"]');
+            if (landingItem) {
+                landingItem.classList.add('landed');
+                currentTopic = landingItem.innerText.replace(/\n/g, ' ').trim();
+                
+                // Enable Timer Link
+                var timerUrl = 'timer.html?topic=' + encodeURIComponent(currentTopic);
+                
+                let timerBtnDesktop = document.getElementById('desktopTimerBtn');
+                let timerBtnMobile = document.getElementById('mobileTimerBtn');
+                
+                timerBtnDesktop.href = timerUrl;
+                timerBtnDesktop.style.pointerEvents = 'auto';
+                timerBtnDesktop.style.opacity = '1';
+                
+                timerBtnMobile.href = timerUrl;
+                timerBtnMobile.style.pointerEvents = 'auto';
+                timerBtnMobile.style.opacity = '1';
+
+                // Update Speech Analysis Link
+                var analysisUrl = 'analysis.html?topic=' + encodeURIComponent(currentTopic);
+                let speechAnalysisBtn = document.getElementById('speechAnalysisBtn');
+                if (speechAnalysisBtn) {
+                   speechAnalysisBtn.href = analysisUrl;
+                }
+            }
+
+            playLand();
+            if (handleArm) handleArm.classList.remove('disabled');
+            document.getElementById('desktopSpinBtn').disabled = false;
+            document.getElementById('desktopSaveBtn').disabled = false;
+            document.getElementById('mobileSpinBtn').disabled = false;
+            isSpinning = false;
+        }
+
+        animFrameId = requestAnimationFrame(animate);
+    }
+
+    // --- Lever Setup ---
+    (function initLever() {
+        const arm = document.getElementById('handleArm');
+        const knob = document.getElementById('handleKnob');
+        if (!arm || !knob) return;
+
+        const MAX_ANGLE = 180;
+        const DRAG_SENSITIVITY = 280;
+
+        arm.classList.add('hint');
+        arm.addEventListener('animationend', function() {
+            arm.classList.remove('hint');
+        }, { once: true });
+
+        let isDragging = false;
+        let startY = 0;
+        let currentAngle = 0;
+        let hasMoved = false;
+
+        function onPointerMove(e) {
+            if (!isDragging) return;
+
+            var deltaY = Math.max(0, e.clientY - startY);
+            if (deltaY > 3) hasMoved = true;
+            currentAngle = Math.min(deltaY * (MAX_ANGLE / DRAG_SENSITIVITY), MAX_ANGLE);
+
+            arm.style.transform = 'rotate(' + currentAngle + 'deg)';
+
+            var progress = currentAngle / MAX_ANGLE;
+            var shadowBlur = 6 + progress * 14;
+            var shadowY = 2 + progress * 6;
+            knob.style.boxShadow = '0 ' + shadowY + 'px ' + shadowBlur + 'px rgba(26, 60, 52, ' + (0.2 + progress * 0.2) + ')';
+        }
+
+        function onPointerUp(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            arm.classList.remove('grabbing');
+
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
+
+            var normalizedPull = currentAngle / MAX_ANGLE;
+
+            knob.style.boxShadow = '';
+            arm.classList.add('spring-back');
+            arm.style.transform = 'rotate(0deg)';
+            setTimeout(function() {
+                arm.classList.remove('spring-back');
+            }, 600);
+
+            if (hasMoved || currentAngle > 0) {
+                playHandleClunk();
+                var mappedVelocity = 20 + Math.min(normalizedPull, 1) * 35;
+                triggerSpin(mappedVelocity);
+            } else {
+                playHandleClunk();
+                triggerSpin(25);
+            }
+
+            currentAngle = 0;
+            hasMoved = false;
+        }
+
+        knob.addEventListener('pointerdown', function(e) {
+            if (isSpinning) return;
+            if (arm.classList.contains('disabled')) return;
+
+            e.preventDefault();
+            isDragging = true;
+            hasMoved = false;
+            arm.classList.add('grabbing');
+            arm.classList.remove('hint', 'spring-back');
+            arm.style.transition = '';
+            var pullHint = document.getElementById('pullLeverHint');
+            if (pullHint) pullHint.classList.add('hidden');
+
+            startY = e.clientY;
+            currentAngle = 0;
+
+            ensureAudioContext();
+
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
+            window.addEventListener('pointercancel', onPointerUp);
+        });
+    })();
+
+    // --- Dropdowns Bindings ---
+    function setupDropdown(id, triggerId, menuId, optionClass, onSelect) {
+      const dropdown = document.getElementById(id);
+      const trigger = document.getElementById(triggerId);
+      const menu = document.getElementById(menuId);
+
+      trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // Close other dropdowns
+          document.querySelectorAll('.cat-dropdown, .diff-dropdown').forEach(d => {
+            if (d.id !== id) d.classList.remove('open');
+          });
+          dropdown.classList.toggle('open');
+      });
+
+      menu.addEventListener('click', function(e) {
+          const option = e.target.closest('.' + optionClass);
+          if (!option) return;
+          onSelect(option);
+          dropdown.classList.remove('open');
+      });
+
+      document.addEventListener('click', function() {
+          dropdown.classList.remove('open');
+      });
+
+      dropdown.addEventListener('click', function(e) {
+          e.stopPropagation();
+      });
+    }
+
+    // Bind Category
+    setupDropdown('catDropdown', 'catTrigger', 'catMenu', 'catOption', function(option) {
+      const cat = option.getAttribute('data-cat');
+      currentCategory = cat;
+      
+      document.querySelectorAll('#catMenu .cat-option').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+      
+      document.getElementById('catIcon').textContent = option.getAttribute('data-icon');
+      document.getElementById('catLabel').textContent = option.getAttribute('data-label');
+      
+      activeTopics = getMergedTopicPool();
+      reinitReel();
+    });
+
+    // Bind Difficulty
+    setupDropdown('diffDropdown', 'diffTrigger', 'diffMenu', 'diffOption', function(option) {
+      const diff = option.getAttribute('data-diff');
+      currentDifficulty = diff;
+      
+      document.querySelectorAll('#diffMenu .diff-option').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+      
+      document.getElementById('diffIcon').textContent = option.getAttribute('data-icon');
+      document.getElementById('diffLabel').textContent = option.getAttribute('data-label');
+      
+      activeTopics = getMergedTopicPool();
+      reinitReel();
+    });
+
+    // Populate initial reel on load
+    function reinitReel() {
+        var reelStrip = document.getElementById('reelStrip');
+        var topicWindow = document.getElementById('topicWindow');
+        var ITEM_HEIGHT = getItemHeight();
+        var WINDOW_HEIGHT = topicWindow.offsetHeight;
+        var visibleCount = 3;
+
+        var pool = getMergedTopicPool();
+        var initialTopics = shuffleArray(pool).slice(0, visibleCount);
+
+        reelStrip.innerHTML = '';
+        reelStrip.classList.remove('settled');
+
+        initialTopics.forEach(function(topic) {
+            var div = document.createElement('div');
+            div.className = 'reel-item';
+            div.style.height = ITEM_HEIGHT + 'px';
+            div.textContent = topic;
+            reelStrip.appendChild(div);
+        });
+
+        fitTextToWidth(reelStrip.children, topicWindow.offsetWidth - 32);
+
+        var middleIndex = 1;
+        var offsetY = -(middleIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2 - WINDOW_HEIGHT / 2);
+        reelStrip.style.transform = 'translateY(' + offsetY + 'px)';
+
+        reelStrip.classList.add('settled');
+        var centerItem = reelStrip.children[middleIndex];
+        if (centerItem) centerItem.classList.add('landed');
+    }
+
+    // Save and DB Integration
+    async function syncSavedTopics() {
+      const user = JSON.parse(localStorage.getItem('otm_user') || 'null');
+      if (user && user.id) {
+        try {
+          const res = await apiGet(`/progress?user_id=${user.id}`);
+          if (res && res.success && res.saved_topics) {
+            const merged = Array.from(new Set([...savedTopics, ...res.saved_topics]));
+            savedTopics = merged;
+            localStorage.setItem('otm_saved_topics', JSON.stringify(savedTopics));
+            renderSaved();
+          }
+        } catch (err) {
+          console.warn('Could not sync saved topics with backend:', err);
+        }
+      }
+    }
+
+    async function saveTopic() {
+      if (!currentTopic) { showToast('Generate a topic first'); return; }
+      
+      const user = JSON.parse(localStorage.getItem('otm_user') || 'null');
+      if (user && user.id) {
+        try {
+          const data = await apiPost('/progress/save-topic', {
+            user_id: user.id,
+            topic: currentTopic,
+            category: currentCategory,
+            difficulty: currentDifficulty
+          });
+          if (data && data.success) {
+            showToast('Topic saved to cloud ✓');
+          } else {
+            showToast('Saved locally.');
+          }
+        } catch (err) {
+          console.warn('Backend save-topic failed:', err);
+          showToast('Offline: saved locally.');
+        }
+      } else {
+        showToast('Saved locally.');
+      }
+
+      if (savedTopics.includes(currentTopic)) { return; }
+      savedTopics.push(currentTopic);
+      localStorage.setItem('otm_saved_topics', JSON.stringify(savedTopics));
+      renderSaved();
+      if (window.otm_logActivity) window.otm_logActivity();
+    }
+
+    function renderSaved() {
+      const list = document.getElementById('saved-list');
+      if (!savedTopics.length) {
+        list.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; text-align:center; padding:1rem 0;">no saved topics yet</p>';
+        return;
+      }
+      list.innerHTML = savedTopics.map((t, i) => `
+        <div class="saved-item">
+          <span>${t}</span>
+          <button onclick="removeSaved(${i})" style="background:none; border:none; cursor:pointer; color:var(--text); font-size:1.2rem; line-height:1; font-weight:700;">&times;</button>
+        </div>
+      `).join('');
+    }
+
+    function removeSaved(i) {
+      savedTopics.splice(i, 1);
+      localStorage.setItem('otm_saved_topics', JSON.stringify(savedTopics));
+      renderSaved();
+    }
+
+    // --- Buttons Action ---
+    document.getElementById('desktopSpinBtn').addEventListener('click', function() {
+        playHandleClunk();
+        triggerSpin(30);
+    });
+    document.getElementById('mobileSpinBtn').addEventListener('click', function() {
+        playHandleClunk();
+        triggerSpin(30);
+    });
+
+    window.addEventListener('resize', reinitReel);
+
+    // Initialise
+    reinitReel();
+    renderSaved();
+    syncSavedTopics();
+  </script>
+</body>
+</html>

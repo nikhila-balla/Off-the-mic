@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Progress — Off The Mic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <a href="dashboard.html" class="nav-brand">Off The Mic</a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="vocab.html">Vocab</a></li>
+      <li><a href="analysis.html">Analysis</a></li>
+      <li><a href="interview.html">Interview</a></li>
+      <li><a href="progress.html" style="font-weight:600;color:var(--text);">Progress</a></li>
+    </ul>
+    <a href="login.html" class="btn btn-outline btn-sm" id="logout-link">Log out</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="page-header fade-in-1">
+      <a href="dashboard.html" class="back-link">← back</a>
+      <h2>My Progress 📈🏆</h2>
+      <p>small steps, confident voice</p>
+    </div>
+
+    <div class="container-wide">
+      <!-- STREAK ACTIVITY CALENDAR -->
+      <div class="progress-section fade-in-2" style="background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 2rem 2.5rem; margin-bottom: 2rem;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text);">Activity Calendar</h3>
+        
+        <div class="leetcode-layout" style="display: flex; gap: 2.5rem; align-items: center; flex-wrap: wrap;">
+          <!-- Monthly Streak Calendar -->
+          <div style="flex: 1; min-width: 320px;">
+            <div class="streak-calendar-card" style="background: #18181B; color: #FFFFFF; border-radius: 20px; padding: 1.5rem 1.8rem; box-shadow: 0 8px 30px rgba(0,0,0,0.15); position: relative; overflow: visible;">
+              
+              <!-- Calendar Header -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                <div style="text-align: left;">
+                  <h4 id="calendar-day-title" style="font-family: 'Poppins', sans-serif; font-size: 1.4rem; font-weight: 700; color: #FFFFFF; margin: 0; line-height: 1.2;">Day —</h4>
+                  <span id="calendar-time-left" style="font-size: 0.8rem; color: #A1A1AA; font-weight: 500;">— left</span>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <!-- Nav arrows -->
+                  <div style="display: flex; gap: 4px;">
+                    <button onclick="prevMonth()" style="background: transparent; border: none; color: #A1A1AA; font-size: 1rem; cursor: pointer; padding: 4px 8px; transition: color 0.2s;" onmouseover="this.style.color='#FFFFFF'" onmouseout="this.style.color='#A1A1AA'">◀</button>
+                    <button onclick="nextMonth()" style="background: transparent; border: none; color: #A1A1AA; font-size: 1rem; cursor: pointer; padding: 4px 8px; transition: color 0.2s;" onmouseover="this.style.color='#FFFFFF'" onmouseout="this.style.color='#A1A1AA'">▶</button>
+                  </div>
+                  
+                  <!-- Hexagon Streak Badge -->
+                  <div class="streak-hexagon-badge" style="width: 58px; height: 50px; position: relative; background: #e4a959; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #1e1e1e; font-weight: 700; box-shadow: 0 4px 10px rgba(228, 169, 89, 0.3);">
+                    <span id="badge-streak-val" style="font-size: 1.25rem; font-family: 'Poppins', sans-serif; line-weight: 1.1; margin-top: -2px;">0</span>
+                    <span id="badge-month-lbl" style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px;">JUN</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Weekday labels -->
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.72rem; color: #71717A; font-weight: 700; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 0.5px;">
+                <span>S</span>
+                <span>M</span>
+                <span>T</span>
+                <span>W</span>
+                <span>T</span>
+                <span>F</span>
+                <span>S</span>
+              </div>
+              
+              <!-- Days grid -->
+              <div id="calendar-days-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 0.8rem; column-gap: 0.4rem; justify-items: center; align-items: center;">
+                <!-- Dynamically populated day cells -->
+              </div>
+              
+            </div>
+          </div>
+          
+          <!-- Side Stats panel -->
+          <div style="flex: 0 0 240px; display: flex; flex-direction: column; gap: 1.2rem; border-left: 1.5px solid var(--border); padding-left: 2.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+              <span style="font-size: 2.2rem;">🔥</span>
+              <div style="display: flex; flex-direction: column; text-align: left;">
+                <span id="current-streak" style="font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1.2;">0</span>
+                <span style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">Current Streak</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+              <span style="font-size: 2.2rem;">⚡</span>
+              <div style="display: flex; flex-direction: column; text-align: left;">
+                <span id="max-streak" style="font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1.2;">0</span>
+                <span style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">Max Streak</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+              <span style="font-size: 2.2rem;">📅</span>
+              <div style="display: flex; flex-direction: column; text-align: left;">
+                <span id="total-active" style="font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1.2;">0</span>
+                <span style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">Active Days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS GRID -->
+      <div class="stats-grid fade-in-3">
+        <div class="stat-card">
+          <div class="stat-icon">📖</div>
+          <div class="stat-value" id="stat-words">0</div>
+          <div class="stat-label">Words Learned</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value" id="stat-topics">0</div>
+          <div class="stat-label">Topics Saved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💼</div>
+          <div class="stat-value" id="stat-answers">0</div>
+          <div class="stat-label">Answers Saved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎙️</div>
+          <div class="stat-value" id="stat-sessions">0</div>
+          <div class="stat-label">Practice Sessions</div>
+        </div>
+      </div>
+
+      <!-- SKILL PROGRESS -->
+      <div class="progress-section fade-in-4">
+        <h3>Skill Growth</h3>
+
+        <div class="progress-item">
+          <div class="progress-item-label">
+            <span>Vocabulary</span>
+            <span id="prog-vocab-pct">0%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="prog-vocab"></div></div>
+        </div>
+
+        <div class="progress-item">
+          <div class="progress-item-label">
+            <span>Speaking Confidence</span>
+            <span id="prog-conf-pct">0%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="prog-conf"></div></div>
+        </div>
+
+        <div class="progress-item">
+          <div class="progress-item-label">
+            <span>Interview Readiness</span>
+            <span id="prog-int-pct">0%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="prog-int"></div></div>
+        </div>
+
+        <div class="progress-item">
+          <div class="progress-item-label">
+            <span>Topic Fluency</span>
+            <span id="prog-topic-pct">0%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="prog-topic"></div></div>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div class="progress-section fade-in-5">
+        <h3>Recent Words</h3>
+        <div id="recent-words" class="saved-list"></div>
+      </div>
+
+      <div class="progress-section fade-in-5">
+        <h3>Recent Topics</h3>
+        <div id="recent-topics" class="saved-list"></div>
+      </div>
+
+      <div style="text-align:center;padding:1rem 0 3rem;">
+        <button class="btn btn-outline btn-sm" onclick="resetProgress()">Reset All Progress</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+  <script>
+    async function loadProgress() {
+      let learnedWords  = JSON.parse(localStorage.getItem('otm_learned_words')  || '[]');
+      let savedTopics   = JSON.parse(localStorage.getItem('otm_saved_topics')   || '[]');
+      let savedAnswers  = JSON.parse(localStorage.getItem('otm_saved_answers')  || '[]');
+      let sessions      = parseInt(localStorage.getItem('otm_sessions') || '0');
+      let streak        = parseInt(localStorage.getItem('otm_streak') || '1');
+      let backendAnswersSaved = 0;
+
+      const user = JSON.parse(localStorage.getItem('otm_user') || 'null');
+      if (user && user.id) {
+        try {
+          const res = await apiGet(`/progress?user_id=${user.id}`);
+          if (res && res.success) {
+            streak = res.streak ?? streak;
+            sessions = res.sessions ?? sessions;
+            backendAnswersSaved = res.answers_saved ?? 0;
+            
+            if (res.learned_words && res.learned_words.length > learnedWords.length) {
+              learnedWords = res.learned_words;
+              localStorage.setItem('otm_learned_words', JSON.stringify(learnedWords));
+            }
+            if (res.saved_topics && res.saved_topics.length > savedTopics.length) {
+              savedTopics = res.saved_topics;
+              localStorage.setItem('otm_saved_topics', JSON.stringify(savedTopics));
+            }
+          }
+        } catch (err) {
+          console.warn('Backend progress fetch failed, using local storage:', err);
+        }
+      }
+
+      // Update counters
+      document.getElementById('stat-words').textContent      = learnedWords.length;
+      document.getElementById('stat-topics').textContent     = savedTopics.length;
+      document.getElementById('stat-answers').textContent    = Math.max(savedAnswers.length, backendAnswersSaved);
+      document.getElementById('stat-sessions').textContent   = sessions;
+
+      renderActivityGrid();
+
+      // Skill percentages
+      const vocabPct   = Math.min(100, Math.round(learnedWords.length / 15 * 100));
+      const confPct    = Math.min(100, Math.round(sessions / 10 * 100));
+      const intPct     = Math.min(100, Math.round(Math.max(savedAnswers.length, backendAnswersSaved) / 10 * 100));
+      const topicPct   = Math.min(100, Math.round(savedTopics.length / 10 * 100));
+
+      setProgress('prog-vocab', vocabPct);
+      setProgress('prog-conf',  confPct);
+      setProgress('prog-int',   intPct);
+      setProgress('prog-topic', topicPct);
+
+      // Recent words
+      const rwList = document.getElementById('recent-words');
+      if (learnedWords.length) {
+        rwList.innerHTML = learnedWords.slice(-5).reverse().map(w =>
+          `<div class="saved-item"><span>${w}</span><span class="topic-badge">learned</span></div>`
+        ).join('');
+      } else {
+        rwList.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:0.5rem 0;">no words yet — visit the Vocab page</p>';
+      }
+
+      // Recent topics
+      const rtList = document.getElementById('recent-topics');
+      if (savedTopics.length) {
+        rtList.innerHTML = savedTopics.slice(-5).reverse().map(t =>
+          `<div class="saved-item"><span>${t}</span></div>`
+        ).join('');
+      } else {
+        rtList.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:0.5rem 0;">no saved topics yet — visit the Topics page</p>';
+      }
+
+      // Increment session count for this visit
+      localStorage.setItem('otm_sessions', sessions + 1);
+    }
+
+    function setProgress(id, pct) {
+      document.getElementById(id + '-pct').textContent = pct + '%';
+      setTimeout(() => {
+        document.getElementById(id).style.width = pct + '%';
+      }, 100);
+    }
+
+    let currentCalMonth = new Date().getMonth(); // 0-11
+    let currentCalYear = new Date().getFullYear();
+
+    function prevMonth() {
+      currentCalMonth--;
+      if (currentCalMonth < 0) {
+        currentCalMonth = 11;
+        currentCalYear--;
+      }
+      renderActivityGrid();
+    }
+
+    function nextMonth() {
+      currentCalMonth++;
+      if (currentCalMonth > 11) {
+        currentCalMonth = 0;
+        currentCalYear++;
+      }
+      renderActivityGrid();
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const diffMs = midnight - now;
+      
+      const hours = Math.floor(diffMs / 3600000);
+      const minutes = Math.floor((diffMs % 3600000) / 60000);
+      const seconds = Math.floor((diffMs % 60000) / 1000);
+      
+      const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} left`;
+      
+      const timeLeftEl = document.getElementById('calendar-time-left');
+      if (timeLeftEl) {
+        timeLeftEl.textContent = timeStr;
+      }
+    }
+    
+    // Start interval
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    function renderActivityGrid() {
+      const grid = document.getElementById('calendar-days-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      
+      const activities = JSON.parse(localStorage.getItem('otm_activity_dates') || '{}');
+      const streak = parseInt(localStorage.getItem('otm_streak') || '0');
+      const maxStreak = parseInt(localStorage.getItem('otm_max_streak') || streak);
+      
+      document.getElementById('current-streak').textContent = streak;
+      document.getElementById('max-streak').textContent = maxStreak;
+      
+      // Calculate active days
+      const activeDays = Object.keys(activities).filter(d => activities[d] > 0).length;
+      document.getElementById('total-active').textContent = activeDays;
+      
+      // Update badge streak value & month label
+      document.getElementById('badge-streak-val').textContent = streak;
+      const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      document.getElementById('badge-month-lbl').textContent = monthNamesShort[currentCalMonth];
+      
+      // Title: "Day [Today's Date]"
+      const todayDate = new Date();
+      document.getElementById('calendar-day-title').textContent = `Day ${todayDate.getDate()}`;
+      
+      // Determine first day of month (0 = Sun, 1 = Mon, etc.)
+      const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
+      
+      // Number of days in month
+      const totalDays = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+      
+      // Render empty slots for weekdays preceding the 1st of the month
+      for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.style.width = '32px';
+        emptyCell.style.height = '32px';
+        grid.appendChild(emptyCell);
+      }
+      
+      // Render the day cells
+      for (let day = 1; day <= totalDays; day++) {
+        const cell = document.createElement('div');
+        cell.style.width = '32px';
+        cell.style.height = '32px';
+        cell.style.position = 'relative';
+        cell.style.display = 'flex';
+        cell.style.flexDirection = 'column';
+        cell.style.alignItems = 'center';
+        cell.style.justifyContent = 'center';
+        cell.style.fontSize = '0.9rem';
+        cell.style.fontWeight = '700';
+        cell.style.fontFamily = "'Poppins', sans-serif";
+        
+        // Date formats
+        const currentDate = new Date(currentCalYear, currentCalMonth, day);
+        const dateIso = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + String(currentDate.getDate()).padStart(2, '0');
+        const hasActivity = (activities[dateIso] || 0) > 0;
+        
+        // Clean today comparison
+        const isToday = currentDate.toDateString() === todayDate.toDateString();
+        const isPast = currentDate < todayDate && !isToday;
+        
+        if (isToday) {
+          if (hasActivity) {
+            // Render checked circle
+            cell.innerHTML = `
+              <div class="checked-circle" style="width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #38bdf8; display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 0.75rem; font-weight: 900; box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);">✓</div>
+            `;
+          } else {
+            // Render green circle for today to be completed
+            cell.innerHTML = `
+              <div class="green-today" style="width: 28px; height: 28px; border-radius: 50%; background: #10b981; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 0.85rem; font-weight: 700; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);">${day}</div>
+            `;
+          }
+        } else if (isPast) {
+          if (hasActivity) {
+            // Checked circle
+            cell.innerHTML = `
+              <div class="checked-circle" style="width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #38bdf8; display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 0.75rem; font-weight: 900;">✓</div>
+            `;
+          } else {
+            // Number with a red dot below it
+            cell.innerHTML = `
+              <span style="color: #E4E4E7; margin-bottom: 2px;">${day}</span>
+              <div class="red-dot" style="width: 4px; height: 4px; border-radius: 50%; background: #ef4444; position: absolute; bottom: 1px;"></div>
+            `;
+          }
+        } else {
+          // Future day (simple grey text)
+          cell.innerHTML = `<span style="color: #52525B;">${day}</span>`;
+        }
+        
+        // Add hover tooltips
+        const count = activities[dateIso] || 0;
+        cell.title = `${currentDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}: ${count} activities`;
+        
+        grid.appendChild(cell);
+      }
+    }
+
+    function resetProgress() {
+      if (!confirm('This will clear all your saved words, topics and answers. Are you sure?')) return;
+      ['otm_learned_words','otm_saved_topics','otm_saved_answers','otm_sessions','otm_streak','otm_activity_dates','otm_max_streak'].forEach(k => localStorage.removeItem(k));
+      showToast('Progress reset');
+      setTimeout(() => loadProgress(), 600);
+    }
+
+    loadProgress();
+  </script>
+</body>
+</html>

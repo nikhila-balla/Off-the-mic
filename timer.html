@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Timer — Off The Mic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #F3F7FA;
+            color: #0F2C59;
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-badge {
+            position: fixed;
+            top: 1rem;
+            right: 1.5rem;
+            width: 330px;
+            height: auto;
+            opacity: 0.8;
+            z-index: 10;
+        }
+
+        .speech-analysis-btn {
+            position: fixed;
+            top: 1.75rem;
+            right: calc(330px + 1.5rem + 1.5rem);
+            display: inline-block;
+            padding: 0.45rem 3rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            background: linear-gradient(135deg, #244C7E, #0F2C59);
+            border: 2px solid #0F2C59;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 44, 89, 0.3);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            z-index: 10;
+        }
+
+        .speech-analysis-new-badge {
+            position: absolute;
+            top: -10px;
+            right: -12px;
+            padding: 2px 8px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #0F2C59;
+            background: #e4a959;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(15, 44, 89, 0.25);
+            z-index: 11;
+        }
+
+        .speech-analysis-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(26, 60, 52, 0.45);
+        }
+
+        .speech-analysis-btn:active {
+            transform: scale(0.97);
+        }
+
+        .back-link {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0F2C59;
+            text-decoration: none;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+        }
+
+        .timer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .topic-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .topic-wrapper:empty {
+            display: none;
+        }
+
+        .topic-label {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .topic-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #0F2C59;
+            text-align: center;
+            max-width: 500px;
+            line-height: 1.3;
+        }
+
+        /* --- Ring --- */
+        .ring-wrapper {
+            position: relative;
+            width: 500px;
+            height: 500px;
+        }
+
+        .ring-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .ring-track {
+            fill: none;
+            stroke: #E8E0D0;
+            stroke-width: 10;
+        }
+
+        .ring-progress {
+            fill: none;
+            stroke: #B89EE8;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 722.57;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.3s linear, stroke 0.3s ease;
+        }
+
+        .ring-progress.finished {
+            stroke: #E85D5D;
+            animation: pulseRing 1s ease-in-out infinite;
+        }
+
+        @keyframes pulseRing {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* --- Time Display --- */
+        .time-display {
+            position: absolute;
+            top: 42%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Playfair Display', serif;
+            font-size: 6.5rem;
+            color: #0F2C59;
+            display: flex;
+            align-items: baseline;
+            user-select: none;
+            transition: top 0.3s ease;
+        }
+
+        .ring-wrapper.running .time-display {
+            top: 50%;
+        }
+
+        .time-display.finished {
+            color: #E85D5D;
+            animation: pulseText 1s ease-in-out infinite;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .time-digit {
+            outline: none;
+            border-radius: 4px;
+            padding: 0 2px;
+            min-width: 1ch;
+            caret-color: #B89EE8;
+        }
+
+        .time-digit.editable:focus {
+            background: rgba(184, 158, 232, 0.15);
+        }
+
+        .time-colon {
+            pointer-events: none;
+        }
+
+        /* --- Increment Buttons --- */
+        .increment-row {
+            position: absolute;
+            top: 58%;
+            left: 50%;
+            transform: translate(-50%, 0);
+            display: flex;
+            gap: 1rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .ring-wrapper.running .increment-row {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .increment-btn {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0F2C59;
+            background: transparent;
+            border: 2px solid #0F2C59;
+            border-radius: 50px;
+            padding: 0.6rem 1.8rem;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+        }
+
+        .increment-btn:hover:not(:disabled) {
+            background: #0F2C59;
+            color: #F3F7FA;
+        }
+
+        .increment-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* --- Control Buttons --- */
+        .controls-row {
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+        }
+
+        .play-btn {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #D4C0F9, #B89EE8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(184, 158, 232, 0.4);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(184, 158, 232, 0.5);
+        }
+
+        .play-btn:active {
+            transform: scale(0.95);
+        }
+
+        .play-btn svg {
+            width: 34px;
+            height: 34px;
+            fill: #FFFFFF;
+        }
+
+        .reset-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 2px solid #0F2C59;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .reset-btn:hover {
+            background: #0F2C59;
+        }
+
+        .reset-btn:hover svg {
+            fill: #FFFFFF;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        .reset-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #0F2C59;
+            transition: fill 0.2s ease;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 1024px) and (orientation: portrait) {
+            .brand-badge { width: 180px; top: 0.5rem; right: 0.5rem; }
+            body { justify-content: flex-start; padding-top: 5rem; }
+            .speech-analysis-btn {
+                position: relative;
+                top: auto;
+                right: auto;
+                padding: 0.3rem 1.5rem;
+                font-size: 0.95rem;
+                margin: 0 auto 1.5rem;
+                align-self: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .brand-badge { width: 180px; top: 0.5rem; right: 0.5rem; }
+            .ring-wrapper { width: 425px; height: 425px; }
+            .time-display { font-size: 4rem; }
+            body { justify-content: flex-start; padding-top: 5rem; }
+            .speech-analysis-btn {
+                position: relative;
+                top: auto;
+                right: auto;
+                padding: 0.3rem 1.5rem;
+                font-size: 0.95rem;
+                margin: 0 auto 1.5rem;
+                align-self: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brand-badge { width: 120px; top: 0.5rem; right: 0.5rem; }
+            .ring-wrapper { width: 350px; height: 350px; }
+            .time-display { font-size: 3.5rem; }
+            .play-btn { width: 56px; height: 56px; }
+            .play-btn svg { width: 24px; height: 24px; }
+            .reset-btn { width: 42px; height: 42px; }
+            .reset-btn svg { width: 18px; height: 18px; }
+            .increment-btn { font-size: 0.9rem; padding: 0.4rem 1.1rem; }
+            .back-link { top: 1rem; left: 1rem; font-size: 1rem; }
+            .topic-heading { font-size: 1.4rem; max-width: 300px; }
+            .topic-label { font-size: 0.7rem; }
+            .speech-analysis-btn { padding: 0.25rem 1.2rem; font-size: 0.85rem; margin: 0 auto 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <a href="analysis.html" class="speech-analysis-btn">GET SPEECH ANALYSIS<span class="speech-analysis-new-badge">NEW</span></a>
+    <a href="javascript:history.back()" class="back-link">&larr; Back</a>
+
+    <div class="timer-container">
+        <div class="topic-wrapper" id="topicWrapper">
+            <span class="topic-label">Topic:</span>
+            <div class="topic-heading" id="topicHeading"></div>
+        </div>
+        <div class="ring-wrapper">
+            <svg class="ring-svg" viewBox="0 0 260 260">
+                <circle class="ring-track" cx="130" cy="130" r="115" />
+                <circle class="ring-progress" id="ringProgress" cx="130" cy="130" r="115" />
+            </svg>
+            <div class="time-display" id="timeDisplay">
+                <span class="time-digit editable" id="minuteDigit" contenteditable="true">1</span>
+                <span class="time-colon">:</span>
+                <span class="time-digit editable" id="secondDigit" contenteditable="true">00</span>
+            </div>
+            <div class="increment-row" id="incrementRow">
+                <button class="increment-btn" id="sub30Btn">&minus;0:30</button>
+                <button class="increment-btn" id="add30Btn">+0:30</button>
+            </div>
+        </div>
+
+        <div class="controls-row">
+            <button class="reset-btn" id="resetBtn" title="Reset">
+                <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4C7.58 4 4.01 7.58 4.01 12S7.58 20 12 20c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            </button>
+            <button class="play-btn" id="playBtn" title="Play">
+                <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Topic from URL ---
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var topic = params.get('topic');
+            if (topic) {
+                document.getElementById('topicHeading').textContent = topic;
+            } else {
+                document.getElementById('topicWrapper').style.display = 'none';
+            }
+        })();
+
+        // --- State ---
+        var urlDuration = parseInt(new URLSearchParams(window.location.search).get('duration'));
+        var totalSeconds = urlDuration > 0 ? urlDuration : 60;
+        var remainingSeconds = totalSeconds;
+        var isRunning = false;
+        var hasStarted = false;
+        var intervalId = null;
+        var isFinished = false;
+
+        // --- DOM Elements ---
+        var ringProgress = document.getElementById('ringProgress');
+        var timeDisplay = document.getElementById('timeDisplay');
+        var minuteDigit = document.getElementById('minuteDigit');
+        var secondDigit = document.getElementById('secondDigit');
+        var sub30Btn = document.getElementById('sub30Btn');
+        var add30Btn = document.getElementById('add30Btn');
+        var playBtn = document.getElementById('playBtn');
+        var resetBtn = document.getElementById('resetBtn');
+        var playIcon = document.getElementById('playIcon');
+        var pauseIcon = document.getElementById('pauseIcon');
+
+        var ringWrapper = document.querySelector('.ring-wrapper');
+        var CIRCUMFERENCE = 2 * Math.PI * 115; // ~722.57
+
+        // --- Web Audio API ---
+        var audioCtx = null;
+
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playClickSound() {
+            ensureAudioContext();
+            var now = audioCtx.currentTime;
+            var osc = audioCtx.createOscillator();
+            var gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(700, now);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        }
+
+        function playStartSound() {
+            ensureAudioContext();
+            var now = audioCtx.currentTime;
+
+            // Three-note ascending chime: C5 → E5 → G5
+            var notes = [523, 659, 784];
+            notes.forEach(function(freq, i) {
+                var t = now + i * 0.12;
+                var osc = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, t);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t);
+                osc.stop(t + 0.4);
+
+                // Layered harmonic for richness
+                var osc2 = audioCtx.createOscillator();
+                var gain2 = audioCtx.createGain();
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(freq * 2, t);
+                gain2.gain.setValueAtTime(0, t);
+                gain2.gain.linearRampToValueAtTime(0.06, t + 0.02);
+                gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start(t);
+                osc2.stop(t + 0.3);
+            });
+        }
+
+        function playAlarm() {
+            ensureAudioContext();
+            var now = audioCtx.currentTime;
+            var tones = [880, 1100, 880];
+            // Play the 3-tone sequence 3 times with a gap between each
+            for (var r = 0; r < 3; r++) {
+                var repOffset = r * 0.8;
+                tones.forEach(function(freq, i) {
+                    var t = now + repOffset + i * 0.2;
+                    var osc = audioCtx.createOscillator();
+                    var gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, t);
+                    gain.gain.setValueAtTime(0.15, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.2);
+                });
+            }
+        }
+
+        // --- Display ---
+        function updateDisplay() {
+            var mins = Math.floor(remainingSeconds / 60);
+            var secs = remainingSeconds % 60;
+            minuteDigit.textContent = String(mins);
+            secondDigit.textContent = secs < 10 ? '0' + secs : String(secs);
+        }
+
+        // Trigger session progress log on timer complete
+        function logPracticeSession() {
+            let sessions = parseInt(localStorage.getItem('otm_sessions') || '0');
+            localStorage.setItem('otm_sessions', sessions + 1);
+        }
+
+        function updateRing() {
+            var progress = totalSeconds > 0 ? remainingSeconds / totalSeconds : 0;
+            var offset = CIRCUMFERENCE * (1 - progress);
+            ringProgress.style.strokeDashoffset = offset;
+        }
+
+        // --- Editable Time ---
+        function lockEditing() {
+            minuteDigit.contentEditable = 'false';
+            secondDigit.contentEditable = 'false';
+            minuteDigit.classList.remove('editable');
+            secondDigit.classList.remove('editable');
+        }
+
+        function unlockEditing() {
+            minuteDigit.contentEditable = 'true';
+            secondDigit.contentEditable = 'true';
+            minuteDigit.classList.add('editable');
+            secondDigit.classList.add('editable');
+        }
+
+        function parseTimeFromDisplay() {
+            var mins = parseInt(minuteDigit.textContent, 10) || 0;
+            var secs = parseInt(secondDigit.textContent, 10) || 0;
+            mins = Math.max(0, Math.min(99, mins));
+            secs = Math.max(0, Math.min(59, secs));
+            return mins * 60 + secs;
+        }
+
+        function commitEdit() {
+            totalSeconds = parseTimeFromDisplay();
+            remainingSeconds = totalSeconds;
+            updateDisplay();
+            updateRing();
+        }
+
+        function handleDigitKeydown(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.target.blur();
+                return;
+            }
+            if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'].indexOf(e.key) !== -1) return;
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') return;
+            if (!/^\d$/.test(e.key)) {
+                e.preventDefault();
+            }
+        }
+
+        function handleDigitBlur(e) {
+            commitEdit();
+        }
+
+        function handleDigitFocus(e) {
+            var range = document.createRange();
+            range.selectNodeContents(e.target);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        minuteDigit.addEventListener('keydown', handleDigitKeydown);
+        secondDigit.addEventListener('keydown', handleDigitKeydown);
+        minuteDigit.addEventListener('blur', handleDigitBlur);
+        secondDigit.addEventListener('blur', handleDigitBlur);
+        minuteDigit.addEventListener('focus', handleDigitFocus);
+        secondDigit.addEventListener('focus', handleDigitFocus);
+
+        function handlePaste(e) {
+            e.preventDefault();
+            var text = (e.clipboardData || window.clipboardData).getData('text');
+            var digits = text.replace(/\D/g, '');
+            document.execCommand('insertText', false, digits);
+        }
+        minuteDigit.addEventListener('paste', handlePaste);
+        secondDigit.addEventListener('paste', handlePaste);
+
+        // --- Increment Buttons ---
+        sub30Btn.addEventListener('click', function() {
+            ensureAudioContext();
+            playClickSound();
+            var newTotal = Math.max(0, totalSeconds - 30);
+            var diff = totalSeconds - newTotal;
+            totalSeconds = newTotal;
+            remainingSeconds = Math.max(0, remainingSeconds - diff);
+            updateDisplay();
+            updateRing();
+        });
+
+        add30Btn.addEventListener('click', function() {
+            ensureAudioContext();
+            playClickSound();
+            totalSeconds += 30;
+            remainingSeconds += 30;
+            updateDisplay();
+            updateRing();
+        });
+
+        function disableIncrements() {
+            sub30Btn.disabled = true;
+            add30Btn.disabled = true;
+        }
+
+        function enableIncrements() {
+            sub30Btn.disabled = false;
+            add30Btn.disabled = false;
+        }
+
+        // --- Play / Pause ---
+        playBtn.addEventListener('click', function() {
+            ensureAudioContext();
+
+            if (isFinished) {
+                doReset();
+                return;
+            }
+
+            if (isRunning) {
+                doPause();
+            } else {
+                doPlay();
+            }
+        });
+
+        function doPlay() {
+            if (remainingSeconds <= 0) return;
+
+            var editedSeconds = parseTimeFromDisplay();
+            if (editedSeconds !== remainingSeconds) {
+                remainingSeconds = editedSeconds;
+                totalSeconds = Math.max(totalSeconds, remainingSeconds);
+                updateRing();
+            }
+            if (remainingSeconds <= 0) return;
+
+            isRunning = true;
+            hasStarted = true;
+            lockEditing();
+            disableIncrements();
+            ringWrapper.classList.add('running');
+            playStartSound();
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'block';
+
+            intervalId = setInterval(function() {
+                remainingSeconds--;
+                updateDisplay();
+                updateRing();
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                    isRunning = false;
+                    isFinished = true;
+                    playIcon.style.display = 'block';
+                    pauseIcon.style.display = 'none';
+                    ringProgress.classList.add('finished');
+                    timeDisplay.classList.add('finished');
+                    playAlarm();
+                    logPracticeSession();
+                }
+            }, 1000);
+        }
+
+        function doPause() {
+            isRunning = false;
+            clearInterval(intervalId);
+            intervalId = null;
+            unlockEditing();
+            enableIncrements();
+            ringWrapper.classList.remove('running');
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+        }
+
+        function doReset() {
+            isRunning = false;
+            hasStarted = false;
+            isFinished = false;
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            totalSeconds = urlDuration > 0 ? urlDuration : 60;
+            remainingSeconds = totalSeconds;
+            ringProgress.classList.remove('finished');
+            timeDisplay.classList.remove('finished');
+            unlockEditing();
+            enableIncrements();
+            ringWrapper.classList.remove('running');
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            updateDisplay();
+            updateRing();
+        }
+
+        // --- Init ---
+        updateDisplay();
+        updateRing();
+    </script>
+</body>
+</html>

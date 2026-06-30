@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interview Prep — Off The Mic</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: var(--bg) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .page-wrapper {
+      padding-top: 100px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Expand textarea styling for neat placement in slot-machine right panel */
+    .answer-area {
+      width: 100%;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 1.8rem;
+      margin-top: 2rem;
+    }
+    .fw-name {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0F2C59 !important;
+      letter-spacing: 0.05em;
+    }
+    @keyframes micPulse {
+      0% { box-shadow: 0 0 0 0 rgba(201, 121, 106, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(201, 121, 106, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(201, 121, 106, 0); }
+    }
+    .mic-recording {
+      background: #FFF9F8 !important;
+      border-color: #c9796a !important;
+      color: #c9796a !important;
+      animation: micPulse 1.5s infinite;
+    }
+  </style>
+</head>
+<body class="page-interview">
+  <nav>
+    <a href="dashboard.html" class="nav-brand">Off The Mic</a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="vocab.html">Vocab</a></li>
+      <li><a href="analysis.html">Analysis</a></li>
+      <li><a href="interview.html" style="font-weight:600;color:var(--text);">Interview</a></li>
+      <li><a href="progress.html">Progress</a></li>
+    </ul>
+    <a href="login.html" class="btn btn-outline btn-sm" id="logout-link">Log out</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <!-- Mode Tab Bar -->
+    <div class="tab-bar" id="tabBar">
+        <a href="interview.html" class="tab-btn active" style="text-decoration:none;">Interview Prep</a>
+        <a href="vocab.html" class="tab-btn" style="text-decoration:none;">Learn Vocab</a>
+    </div>
+
+    <div class="slot-machine-container">
+        <!-- Left Panel: Logos and Guidance -->
+        <div class="left-panel">
+            <div class="brand-title-wrap">
+                <h1 class="brand-title">Interview <span class="highlight">Prep</span> ✨💼</h1>
+                <div class="subtitle-steps">
+                    <div class="step-item"><span class="step-num">1</span> Pull lever to get question</div>
+                    <div class="step-item"><span class="step-num">2</span> Formulate your answer</div>
+                    <div class="step-item"><span class="step-num">3</span> Get AI feedback</div>
+                </div>
+            </div>
+            
+            <!-- Guidance Accordion (Moved here) -->
+            <div class="guidance-panel" style="width:100%; margin-top:2rem;">
+                <div class="framework-buttons" id="frameworkButtons" style="display:flex; margin-top:0; width:100%; max-width:100%;">
+                    <div class="fw-heading" id="fwHeading" style="font-family:'Playfair Display', serif; font-size:1.3rem; margin-bottom:0.75rem;">Frameworks</div>
+                    
+                    <!-- STAR Card -->
+                    <div class="framework-card" id="fwStar" style="margin-bottom:0.5rem;">
+                        <button class="framework-toggle" onclick="toggleFwCard('fwStar')"><span class="fw-name">STAR Framework</span> <span class="fw-chevron">&#9660;</span></button>
+                        <div class="framework-content" id="fwStarContent">
+                            <strong>S</strong> = Situation: Set the scene and context<br>
+                            <strong>T</strong> = Task: Describe your responsibility<br>
+                            <strong>A</strong> = Action: Explain what you did<br>
+                            <strong>R</strong> = Result: Share the outcome
+                        </div>
+                    </div>
+ 
+                    <!-- PREP Card -->
+                    <div class="framework-card" id="fwPrep" style="margin-bottom:0.5rem;">
+                        <button class="framework-toggle" onclick="toggleFwCard('fwPrep')"><span class="fw-name">PREP Framework</span> <span class="fw-chevron">&#9660;</span></button>
+                        <div class="framework-content" id="fwPrepContent">
+                            <strong>P</strong> = Point: State your main point<br>
+                            <strong>R</strong> = Reason: Explain why<br>
+                            <strong>E</strong> = Example: Give a specific example<br>
+                            <strong>P</strong> = Point: Restate your point
+                        </div>
+                    </div>
+ 
+                    <!-- PPF Card -->
+                    <div class="framework-card" id="fwPpf" style="margin-bottom:0.5rem;">
+                        <button class="framework-toggle" onclick="toggleFwCard('fwPpf')"><span class="fw-name">PPF Framework</span> <span class="fw-chevron">&#9660;</span></button>
+                        <div class="framework-content" id="fwPpfContent">
+                            <strong>P</strong> = Past: Where you've been<br>
+                            <strong>P</strong> = Present: Where you are now<br>
+                            <strong>F</strong> = Future: Where you're headed
+                        </div>
+                    </div>
+ 
+                    <!-- MECE Card -->
+                    <div class="framework-card" id="fwMece" style="margin-bottom:0.5rem;">
+                        <button class="framework-toggle" onclick="toggleFwCard('fwMece')"><span class="fw-name">MECE Framework</span> <span class="fw-chevron">&#9660;</span></button>
+                        <div class="framework-content" id="fwMeceContent">
+                            <strong>M</strong>utually <strong>E</strong>xclusive: No overlapping buckets<br>
+                            <strong>C</strong>ollectively <strong>E</strong>xhaustive: Nothing is left out<br><br>
+                            1. Break the problem into distinct categories<br>
+                            2. Ensure categories cover everything<br>
+                            3. Drill into each bucket systematically
+                        </div>
+                    </div>
+
+                    <button class="example-btn" id="exampleBtn" onclick="showExamplePopup()">Show sample answer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Filters, Slot Machine, Actions -->
+        <div class="right-panel">
+            <div class="dropdown-row">
+                <!-- Interview Question Type Dropdown -->
+                <div class="cat-dropdown" id="catDropdown">
+                    <button class="cat-trigger" id="catTrigger">
+                        <span class="cat-icon" id="catIcon">💬</span>
+                        <span class="cat-label" id="catLabel">HR Questions</span>
+                        <span class="cat-chevron">▼</span>
+                    </button>
+                    <div class="cat-menu" id="catMenu">
+                        <button class="cat-option selected" data-cat="hr" data-icon="💬" data-label="HR Questions">
+                            <span class="cat-icon">💬</span> HR Questions
+                            <span class="cat-check">✓</span>
+                        </button>
+                        <button class="cat-option" data-cat="behavioral" data-icon="👥" data-label="Behavioural">
+                            <span class="cat-icon">👥</span> Behavioural
+                            <span class="cat-check">✓</span>
+                        </button>
+                        <button class="cat-option" data-cat="technical" data-icon="💻" data-label="Technical">
+                            <span class="cat-icon">💻</span> Technical
+                            <span class="cat-check">✓</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slot Machine Assembly -->
+            <div class="reel-assembly">
+                <div class="topic-col">
+                    <div class="topic-window" id="topicWindow">
+                        <div class="reel-strip" id="reelStrip"></div>
+                        <div class="reel-center-line" id="centerLine"></div>
+                    </div>
+                    <div class="desktop-btn-row">
+                        <button class="spin-btn-desktop" id="desktopSpinBtn">Spin!</button>
+                        <a href="timer.html" class="timer-btn-desktop" id="desktopTimerBtn" style="margin-left:8px; pointer-events:none; opacity:0.5;">Start Timer &rarr;</a>
+                    </div>
+                </div>
+                <div class="slot-handle" aria-hidden="true">
+                    <img src="pull-lever.png" alt="Pull lever" class="pull-lever-hint" id="pullLeverHint">
+                    <div class="handle-arm" id="handleArm">
+                        <div class="handle-knob" id="handleKnob">
+                            <div class="handle-knob-grip"></div>
+                        </div>
+                        <div class="handle-shaft"></div>
+                    </div>
+                    <div class="handle-pivot"></div>
+                </div>
+            </div>
+
+            <div class="mobile-btn-row">
+                <button class="mobile-spin-btn" id="mobileSpinBtn">Spin!</button>
+                <a href="timer.html" class="timer-btn-mobile" id="mobileTimerBtn" style="pointer-events:none; opacity:0.5;">Timer</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Area (Full width below) -->
+    <div style="max-width:1400px; width:100%; margin: 2rem auto 4rem; padding: 0 3rem;">
+        <div class="action-panel" style="width: 100%;">
+            <!-- Answer Input and Feedback Card -->
+            <div class="answer-area" style="margin-top:0;">
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label style="font-family:'Poppins',sans-serif; font-size:0.8rem; font-weight:600; color:var(--text); text-transform:uppercase; margin:0;">Your Answer</label>
+                    <button id="mic-btn" onclick="toggleMic()" class="btn btn-sm btn-outline" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-color: var(--border); background: transparent; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; transition: all 0.3s;">
+                      <span id="mic-icon">🎙️</span>
+                      <span id="mic-text">Record Answer</span>
+                    </button>
+                  </div>
+                  <textarea id="answer-input" placeholder="Type key points for your answer, or click 'Record Answer' to speak your response directly..." style="min-height:130px; border:1.5px solid var(--border); border-radius:12px; padding:0.85rem; font-family:'Poppins',sans-serif; width:100%; transition: border-color 0.3s;"></textarea>
+                  <p id="mic-status" style="font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; display: none; text-align: left;"></p>
+                </div>
+
+                <div id="answer-feedback" class="hidden" style="margin-bottom:1rem; background:rgba(15,44,89,0.03); border:1px solid var(--border); border-radius:12px; padding:1.2rem;">
+                    <h4 style="font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--text); margin-bottom:0.5rem;">Feedback & Suggestions</h4>
+                    <div id="answer-feedback-items"></div>
+                </div>
+
+                <div class="btn-row" style="justify-content:flex-start; margin-top:0.5rem;">
+                  <button class="btn btn-sm btn-primary" onclick="analyseAnswer()">Get Feedback</button>
+                  <button class="btn btn-sm btn-outline" onclick="clearAnswer()" style="margin-left:8px;">Clear</button>
+                  <button class="btn btn-sm btn-ghost" onclick="saveAnswer()" style="margin-left:8px;">Save Answer</button>
+                </div>
+            </div>
+
+            <!-- Saved Answers Section -->
+            <div id="saved-answers-section" style="width:100%; margin-top:2rem; background:var(--card); border:1.5px solid var(--border); border-radius:16px; padding:1.8rem;">
+                <h3 style="font-family:'Playfair Display', serif; font-size:1.4rem; color:var(--text); margin-bottom:0.25rem;">Saved Answers</h3>
+                <p style="font-size:0.8rem; color:var(--muted); margin-bottom:1rem;"><span id="saved-count">0</span> answers saved</p>
+                <div id="saved-answers-list" class="saved-list" style="max-height:250px; overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Modal overlay for sample answers -->
+  <div class="example-overlay" id="exampleOverlay">
+      <div class="example-popup">
+          <button class="example-close" id="exampleClose" onclick="closeExamplePopup()">&times;</button>
+          <div class="example-question" id="exampleQuestion"></div>
+          <div class="example-body" id="exampleBody"></div>
+      </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+  <script>
+    // ── INTERVIEW QUESTIONS BANK (Fallback) ─────────────────────────
+    const questionBank = {
+      hr: {
+        questions: [
+          "Tell me about yourself.",
+          "Why do you want to work here?",
+          "What are your greatest strengths?",
+          "What is your biggest weakness?",
+          "Where do you see yourself in five years?",
+          "Why are you leaving your current role?",
+          "What motivates you at work?",
+          "How do you handle stress and pressure?",
+        ],
+        tips: [
+          "Structure your answer: background → skills → enthusiasm for this role.",
+          "Research the company and align your values to their mission.",
+          "Choose strengths that match the job description with a concrete example.",
+          "Name a real weakness and demonstrate how you are actively improving.",
+          "Be specific and ambitious but realistic.",
+          "Stay positive — focus on growth, not dissatisfaction.",
+          "Link your motivators to the actual work this role involves.",
+          "Describe a concrete coping strategy you genuinely use.",
+        ]
+      },
+      behavioral: {
+        questions: [
+          "Tell me about a time you failed. What did you learn?",
+          "Describe a situation where you had to work with a difficult colleague.",
+          "Give an example of a time you showed leadership without a formal title.",
+          "Tell me about a time you had to meet a tight deadline.",
+          "Describe a time you had to persuade someone who disagreed with you.",
+          "Tell me about a time you received critical feedback. How did you respond?",
+          "Give an example of a creative solution you came up with.",
+          "Describe a time you went above and beyond what was expected.",
+        ],
+        tips: [
+          "Use STAR: Situation → Task → Action → Result. End with a learning.",
+          "Focus on your actions and empathy, not the colleague's flaws.",
+          "Leadership is about influence — describe how you rallied others.",
+          "Show planning, prioritisation, and calm under pressure.",
+          "Describe how you sought to understand their perspective first.",
+          "Show self-awareness and how you used the feedback to change.",
+          "Walk through your thinking — interviewers value reasoning.",
+          "Be specific and quantify results where possible.",
+        ]
+      },
+      technical: {
+        questions: [
+          "Walk me through how you would design a scalable web application.",
+          "How do you approach debugging a complex issue you've never seen before?",
+          "Explain object-oriented programming in simple terms.",
+          "What is the difference between a process and a thread?",
+          "How do you ensure code quality in a team environment?",
+          "Explain REST APIs and when you would use them.",
+          "What is your experience with version control systems like Git?",
+          "How would you explain recursion to someone non-technical?",
+        ],
+        tips: [
+          "Think aloud — interviewers value your reasoning as much as the answer.",
+          "Show a systematic approach: reproduce, isolate, test, fix, verify.",
+          "Use a relatable analogy to show depth of understanding.",
+          "Processes are independent; threads share memory within a process.",
+          "Mention code reviews, linting, tests, and documentation.",
+          "REST = stateless, resource-based. Compare with GraphQL if relevant.",
+          "Mention branching strategies and how you handle merge conflicts.",
+          "Use a simple analogy like Russian nesting dolls.",
+        ]
+      }
+    };
+
+    // Recommended frameworks mapping
+    const interviewFrameworkMap = {
+      "Tell me about yourself.": "ppf",
+      "Why do you want to work here?": "prep",
+      "What are your greatest strengths?": "prep",
+      "What is your biggest weakness?": "prep",
+      "Where do you see yourself in five years?": "prep",
+      "Why are you leaving your current role?": "prep",
+      "What motivates you at work?": "prep",
+      "How do you handle stress and pressure?": "prep",
+      "Tell me about a time you failed. What did you learn?": "star",
+      "Describe a situation where you had to work with a difficult colleague.": "star",
+      "Give an example of a time you showed leadership without a formal title.": "star",
+      "Tell me about a time you had to meet a tight deadline.": "star",
+      "Describe a time you had to persuade someone who disagreed with you.": "star",
+      "Tell me about a time you received critical feedback. How did you respond?": "star",
+      "Give an example of a creative solution you came up with.": "star",
+      "Describe a time you went above and beyond what was expected.": "star",
+      "Walk through how you would design a scalable web application.": "mece",
+      "How do you approach debugging a complex issue you've never seen before?": "prep",
+      "Explain object-oriented programming in simple terms.": "prep",
+      "What is the difference between a process and a thread?": "prep",
+      "How do you ensure code quality in a team environment?": "prep",
+      "Explain REST APIs and when you would use them.": "prep",
+      "What is your experience with version control systems like Git?": "prep",
+      "How would you explain recursion to someone non-technical?": "prep"
+    };
+
+    // Sample Answers DB
+    const interviewExamples = {
+      "Tell me about yourself.": {
+        past: "I started my career in software engineering 3 years ago, building user-friendly front-ends.",
+        present: "Currently, I lead front-end designs at a tech startup, collaborating across teams to ship polished tools.",
+        future: "I want to apply my design polish and coding speed to a dynamic platform like Off The Mic."
+      },
+      "Tell me about a time you failed. What did you learn?": {
+        s: "At my last job, we were launching a critical payment system checkout page.",
+        t: "My task was to integrate the primary transaction processor gateway.",
+        a: "I rushed the final tests to meet the deadline, causing an checkout outage for an hour.",
+        r: "We rolled back immediately. I took ownership, fixed the bug, and built a new test suite. I learned to never compromise testing speed for launch speed."
+      },
+      "Walk through how you would design a scalable web application.": {
+        buckets: "I split the system into Client Delivery (CDN/Caching), Application logic (Load Balancers & Microservices), and Storage (Database clustering).",
+        analysis: "A Load Balancer distributes queries evenly. CDNs serve static code instantly. DB replicas stop database read locks.",
+        recommendation: "Deploy decoupled application instances behind a balancer, utilizing Redis queues for async data tasks."
+      }
+    };
+
+    const frameworkLabels = {
+      star: { s: 'Situation', t: 'Task', a: 'Action', r: 'Result' },
+      prep: { p1: 'Point', r: 'Reason', e: 'Example', p2: 'Point (restate)' },
+      ppf:  { past: 'Past', present: 'Present', future: 'Future' },
+      mece: { buckets: 'Buckets', analysis: 'Analysis', recommendation: 'Recommendation' }
+    };
+    const frameworkKeyOrder = {
+      star: ['s', 't', 'a', 'r'],
+      prep: ['p1', 'r', 'e', 'p2'],
+      ppf:  ['past', 'present', 'future'],
+      mece: ['buckets', 'analysis', 'recommendation']
+    };
+
+    // State
+    var currentType = 'hr';
+    var activeTopics = questionBank.hr.questions;
+    var currentQuestion = '';
+    var currentTip = '';
+    var isSpinning = false;
+    var lastQuestionIndex = -1;
+    var animFrameId = null;
+    var savedAnswers = JSON.parse(localStorage.getItem('otm_saved_answers') || '[]');
+
+    // --- Web Audio API Chimes ---
+    let audioCtx = null;
+    function ensureAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playTick(progress) {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        const freq = 1800 - progress * 900;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.6, now + 0.04);
+
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(2500, now);
+        filter.Q.setValueAtTime(2, now);
+
+        const volume = 0.08 + (1 - progress) * 0.06;
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+    }
+
+    function playLand() {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, now);
+        gain1.gain.setValueAtTime(0.15, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.65);
+
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1320, now + 0.06);
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(0.1, now + 0.06);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.55);
+    }
+
+    function playHandleClunk() {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+        const bufferSize = audioCtx.sampleRate * 0.05;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(600, now);
+        filter.Q.setValueAtTime(1, now);
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+        noise.stop(now + 0.06);
+    }
+
+    // --- Slot Machine Engine ---
+    function getItemHeight() {
+        if (window.innerWidth <= 480) return 100;
+        if (window.innerWidth <= 768) return 120;
+        return 130;
+    }
+
+    function shuffleArray(arr) {
+        const shuffled = arr.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    function fitTextToWidth(items, containerWidth) {
+        var w = window.innerWidth;
+        // Interview questions are long sentences, so use smaller font sizes to prevent vertical & horizontal overflow
+        var maxFontSize = w <= 480 ? 1.0 : (w <= 768 ? 1.2 : 1.45);
+        var minFontSize = w <= 480 ? 0.75 : (w <= 768 ? 0.85 : 0.95);
+        
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var text = item.textContent;
+            
+            // Allow natural word wrapping, but set custom styling
+            item.style.fontSize = maxFontSize + 'rem';
+            item.style.lineHeight = '1.25';
+            item.style.whiteSpace = 'normal'; // Allow wrapping
+            item.style.wordBreak = 'break-word';
+            
+            // Shrink font size if it has too many characters to fit vertically/horizontally
+            if (text.length > 120) {
+                item.style.fontSize = (maxFontSize * 0.7) + 'rem';
+            } else if (text.length > 80) {
+                item.style.fontSize = (maxFontSize * 0.8) + 'rem';
+            }
+        }
+    }
+
+    async function triggerSpin(velocityOverride) {
+      if (isSpinning) return;
+
+      isSpinning = true;
+      document.getElementById('desktopSpinBtn').disabled = true;
+      document.getElementById('mobileSpinBtn').disabled = true;
+      
+      let timerBtnDesktop = document.getElementById('desktopTimerBtn');
+      let timerBtnMobile = document.getElementById('mobileTimerBtn');
+      timerBtnDesktop.style.pointerEvents = 'none';
+      timerBtnDesktop.style.opacity = '0.5';
+      timerBtnMobile.style.pointerEvents = 'none';
+      timerBtnMobile.style.opacity = '0.5';
+
+      collapseAllFrameworks();
+      hideRecommendation();
+      hideExampleBtn();
+      clearAnswer();
+
+      let questionLanded = '';
+      let questionTip = '';
+      try {
+        const data = await window.offTheMic.getInterviewQ(currentType);
+        if (data && data.question) {
+          // If backend returns a question, check it
+          const answered = savedAnswers.map(item => item.q);
+          if (!answered.includes(data.question)) {
+            questionLanded = data.question;
+            questionTip = data.tip || '';
+          }
+        }
+      } catch (err) {
+        console.warn('API getInterviewQ failed, falling back to local pool:', err);
+      }
+
+      if (!questionLanded) {
+        const bank = questionBank[currentType].questions;
+        const tips = questionBank[currentType].tips;
+        const answered = savedAnswers.map(item => item.q);
+        
+        let pairs = bank.map((q, idx) => ({ q, tip: tips[idx] || '' }));
+        let filteredPairs = pairs.filter(p => !answered.includes(p.q));
+        
+        if (filteredPairs.length === 0) {
+          filteredPairs = pairs;
+        }
+        
+        const selectedPair = filteredPairs[Math.floor(Math.random() * filteredPairs.length)];
+        questionLanded = selectedPair.q;
+        questionTip = selectedPair.tip;
+      }
+
+      currentTip = questionTip;
+      executeSpin(questionLanded, velocityOverride);
+    }
+
+    function executeSpin(questionLanded, initialVelocity) {
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        ensureAudioContext();
+
+        const reelStrip = document.getElementById('reelStrip');
+        const topicWindow = document.getElementById('topicWindow');
+        const handleArm = document.getElementById('handleArm');
+
+        if (handleArm) handleArm.classList.add('disabled');
+
+        const ITEM_HEIGHT = getItemHeight();
+        const WINDOW_HEIGHT = topicWindow.offsetHeight;
+
+        const INITIAL_VELOCITY = initialVelocity || 55;
+        const FRICTION = 0.93;
+        const STOP_THRESHOLD = 1.5;
+
+        let simVel = INITIAL_VELOCITY;
+        let simDist = 0;
+        while (simVel >= STOP_THRESHOLD) {
+            simDist += simVel;
+            simVel *= FRICTION;
+        }
+
+        const centerAtStop = simDist + WINDOW_HEIGHT / 2;
+        const naturalIndex = Math.round((centerAtStop - ITEM_HEIGHT / 2) / ITEM_HEIGHT);
+        const LANDING_INDEX = naturalIndex + 1;
+        const REEL_COUNT = LANDING_INDEX + 3;
+
+        let reelQuestions = [];
+        const pool = questionBank[currentType].questions;
+        while (reelQuestions.length < REEL_COUNT) {
+            reelQuestions = reelQuestions.concat(shuffleArray(pool));
+        }
+        reelQuestions = reelQuestions.slice(0, REEL_COUNT);
+        reelQuestions[LANDING_INDEX] = questionLanded;
+
+        const TARGET_Y = -(LANDING_INDEX * ITEM_HEIGHT + ITEM_HEIGHT / 2 - WINDOW_HEIGHT / 2);
+
+        reelStrip.innerHTML = '';
+        reelStrip.classList.remove('settled');
+        reelStrip.style.transform = 'translateY(0px)';
+        
+        reelQuestions.forEach(function(q, i) {
+            const div = document.createElement('div');
+            div.className = 'reel-item';
+            div.style.height = ITEM_HEIGHT + 'px';
+            div.textContent = q;
+            if (i === LANDING_INDEX) {
+                div.setAttribute('data-landing', 'true');
+            }
+            reelStrip.appendChild(div);
+        });
+
+        fitTextToWidth(reelStrip.children, topicWindow.offsetWidth - 32);
+
+        function styleItemsByPosition(currentY) {
+            var viewportCenter = WINDOW_HEIGHT / 2;
+            var items = reelStrip.children;
+            for (var i = 0; i < items.length; i++) {
+                var itemCenter = i * ITEM_HEIGHT + ITEM_HEIGHT / 2 + currentY;
+                var dist = Math.abs(itemCenter - viewportCenter);
+                var norm = Math.min(dist / ITEM_HEIGHT, 1);
+                var scale = 1.6 - norm * 0.6;
+                var opacity = 1 - norm * 0.7;
+                items[i].style.transform = 'scale(' + scale + ')';
+                items[i].style.opacity = opacity;
+            }
+        }
+
+        let position = 0;
+        let velocity = INITIAL_VELOCITY;
+        let lastBoundaryIndex = 0;
+        let lastFrameTime = null;
+
+        function animate(timestamp) {
+            if (lastFrameTime === null) lastFrameTime = timestamp;
+            var rawDt = (timestamp - lastFrameTime) / 16.667;
+            var dt = Math.min(rawDt, 3);
+            lastFrameTime = timestamp;
+
+            if (dt === 0) {
+                animFrameId = requestAnimationFrame(animate);
+                return;
+            }
+
+            position += velocity * dt;
+            velocity *= Math.pow(FRICTION, dt);
+
+            reelStrip.style.transform = 'translateY(' + (-position) + 'px)';
+            styleItemsByPosition(-position);
+
+            var currentBoundaryIndex = Math.floor(position / ITEM_HEIGHT);
+            if (currentBoundaryIndex > lastBoundaryIndex) {
+                var progress = 1 - (velocity / INITIAL_VELOCITY);
+                playTick(Math.min(progress, 0.95));
+                lastBoundaryIndex = currentBoundaryIndex;
+            }
+
+            if (velocity < STOP_THRESHOLD) {
+                snapToTarget();
+                return;
+            }
+
+            animFrameId = requestAnimationFrame(animate);
+        }
+
+        function snapToTarget() {
+            var startY = -position;
+            var distance = TARGET_Y - startY;
+            var startTime = performance.now();
+            var duration = 280;
+
+            function springAnimate(now) {
+                var elapsed = now - startTime;
+                var t = Math.min(elapsed / duration, 1);
+                var spring = 1 - Math.exp(-7 * t) * Math.cos(5 * t);
+                var y = startY + distance * spring;
+
+                reelStrip.style.transform = 'translateY(' + y + 'px)';
+                styleItemsByPosition(y);
+
+                if (t < 1) {
+                    animFrameId = requestAnimationFrame(springAnimate);
+                } else {
+                    reelStrip.style.transform = 'translateY(' + TARGET_Y + 'px)';
+                    onSettleComplete();
+                }
+            }
+            animFrameId = requestAnimationFrame(springAnimate);
+        }
+
+        function onSettleComplete() {
+            reelStrip.classList.add('settled');
+            var landingItem = reelStrip.querySelector('[data-landing="true"]');
+            if (landingItem) {
+                landingItem.classList.add('landed');
+                currentQuestion = landingItem.innerText.replace(/\n/g, ' ').trim();
+                
+                // Set Timer Redirection URL
+                var timerUrl = 'timer.html?topic=' + encodeURIComponent(currentQuestion);
+                
+                let timerBtnDesktop = document.getElementById('desktopTimerBtn');
+                let timerBtnMobile = document.getElementById('mobileTimerBtn');
+                
+                timerBtnDesktop.href = timerUrl;
+                timerBtnDesktop.style.pointerEvents = 'auto';
+                timerBtnDesktop.style.opacity = '1';
+                
+                timerBtnMobile.href = timerUrl;
+                timerBtnMobile.style.pointerEvents = 'auto';
+                timerBtnMobile.style.opacity = '1';
+
+                // Framework recommendation engine mapping
+                var framework = interviewFrameworkMap[currentQuestion];
+                if (framework) {
+                    var fwIdMap = { star: 'fwStar', prep: 'fwPrep', ppf: 'fwPpf', mece: 'fwMece' };
+                    expandFramework(fwIdMap[framework]);
+                    showRecommendation();
+                    
+                    if (interviewExamples[currentQuestion]) {
+                        document.getElementById('exampleBtn').classList.add('visible');
+                    }
+                } else {
+                    // Default fallback
+                    expandFramework('fwPrep');
+                    showRecommendation();
+                }
+            }
+
+            playLand();
+            if (handleArm) handleArm.classList.remove('disabled');
+            document.getElementById('desktopSpinBtn').disabled = false;
+            document.getElementById('mobileSpinBtn').disabled = false;
+            isSpinning = false;
+        }
+
+        animFrameId = requestAnimationFrame(animate);
+    }
+
+    // --- Framework Cards Accordion ---
+    function collapseAllFrameworks() {
+        document.getElementById('exampleBtn').classList.remove('visible');
+        document.querySelectorAll('.framework-card').forEach(card => {
+            card.classList.remove('expanded', 'highlighted', 'pop-in');
+        });
+    }
+
+    function expandFramework(cardId) {
+        collapseAllFrameworks();
+        var card = document.getElementById(cardId);
+        if (card) {
+            card.classList.add('expanded', 'highlighted', 'pop-in');
+        }
+    }
+
+    function toggleFwCard(cardId) {
+        var card = document.getElementById(cardId);
+        if (card.classList.contains('expanded')) {
+            card.classList.remove('expanded', 'highlighted');
+        } else {
+            expandFramework(cardId);
+        }
+    }
+
+    function showRecommendation() {
+        document.getElementById('fwHeading').textContent = 'Recommended framework';
+    }
+
+    function hideRecommendation() {
+        document.getElementById('fwHeading').textContent = 'Frameworks';
+    }
+
+    function hideExampleBtn() {
+        document.getElementById('exampleBtn').classList.remove('visible');
+    }
+
+    // --- Sample Answers Overlay ---
+    function showExamplePopup() {
+        if (!currentQuestion) return;
+        var example = interviewExamples[currentQuestion];
+        if (!example) return;
+        var fw = interviewFrameworkMap[currentQuestion];
+        if (!fw || !frameworkKeyOrder[fw]) return;
+
+        var questionEl = document.getElementById('exampleQuestion');
+        var bodyEl = document.getElementById('exampleBody');
+        questionEl.textContent = currentQuestion;
+
+        var html = '';
+        var keys = frameworkKeyOrder[fw];
+        var labels = frameworkLabels[fw];
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            html += '<div class="example-section">';
+            html += '<span class="example-section-label">' + labels[key] + '</span>';
+            html += example[key];
+            html += '</div>';
+        }
+        bodyEl.innerHTML = html;
+        document.getElementById('exampleOverlay').classList.add('open');
+    }
+
+    function closeExamplePopup() {
+        document.getElementById('exampleOverlay').classList.remove('open');
+    }
+
+    (function initLever() {
+        const arm = document.getElementById('handleArm');
+        const knob = document.getElementById('handleKnob');
+        if (!arm || !knob) return;
+
+        const MAX_ANGLE = 180;
+        const DRAG_SENSITIVITY = 280;
+
+        arm.classList.add('hint');
+        arm.addEventListener('animationend', function() {
+            arm.classList.remove('hint');
+        }, { once: true });
+
+        let isDragging = false;
+        let startY = 0;
+        let currentAngle = 0;
+        let hasMoved = false;
+
+        function onPointerMove(e) {
+            if (!isDragging) return;
+
+            var deltaY = Math.max(0, e.clientY - startY);
+            if (deltaY > 3) hasMoved = true;
+            currentAngle = Math.min(deltaY * (MAX_ANGLE / DRAG_SENSITIVITY), MAX_ANGLE);
+
+            arm.style.transform = 'rotate(' + currentAngle + 'deg)';
+
+            var progress = currentAngle / MAX_ANGLE;
+            var shadowBlur = 6 + progress * 14;
+            var shadowY = 2 + progress * 6;
+            knob.style.boxShadow = '0 ' + shadowY + 'px ' + shadowBlur + 'px rgba(15, 44, 89, ' + (0.2 + progress * 0.2) + ')';
+        }
+
+        function onPointerUp(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            arm.classList.remove('grabbing');
+
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
+
+            var normalizedPull = currentAngle / MAX_ANGLE;
+
+            knob.style.boxShadow = '';
+            arm.classList.add('spring-back');
+            arm.style.transform = 'rotate(0deg)';
+            setTimeout(function() {
+                arm.classList.remove('spring-back');
+            }, 600);
+
+            if (hasMoved || currentAngle > 0) {
+                playHandleClunk();
+                var mappedVelocity = 20 + Math.min(normalizedPull, 1) * 35;
+                triggerSpin(mappedVelocity);
+            } else {
+                playHandleClunk();
+                triggerSpin(25);
+            }
+
+            currentAngle = 0;
+            hasMoved = false;
+        }
+
+        knob.addEventListener('pointerdown', function(e) {
+            if (isSpinning) return;
+            if (arm.classList.contains('disabled')) return;
+
+            e.preventDefault();
+            isDragging = true;
+            hasMoved = false;
+            arm.classList.add('grabbing');
+            arm.classList.remove('hint', 'spring-back');
+            arm.style.transition = '';
+            var pullHint = document.getElementById('pullLeverHint');
+            if (pullHint) pullHint.classList.add('hidden');
+
+            startY = e.clientY;
+            currentAngle = 0;
+
+            ensureAudioContext();
+
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
+            window.addEventListener('pointercancel', onPointerUp);
+        });
+    })();
+
+    // --- Dropdown setup ---
+    (function initCategoryDropdown() {
+      const dropdown = document.getElementById('catDropdown');
+      const trigger = document.getElementById('catTrigger');
+      const menu = document.getElementById('catMenu');
+
+      trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdown.classList.toggle('open');
+      });
+
+      menu.addEventListener('click', function(e) {
+          const option = e.target.closest('.cat-option');
+          if (!option) return;
+          
+          const cat = option.getAttribute('data-cat');
+          currentType = cat;
+          
+          document.querySelectorAll('#catMenu .cat-option').forEach(o => o.classList.remove('selected'));
+          option.classList.add('selected');
+          
+          document.getElementById('catIcon').textContent = option.getAttribute('data-icon');
+          document.getElementById('catLabel').textContent = option.getAttribute('data-label');
+          
+          activeTopics = questionBank[cat].questions;
+          dropdown.classList.remove('open');
+          
+          reinitReel();
+          clearAnswer();
+          collapseAllFrameworks();
+          hideRecommendation();
+      });
+
+      document.addEventListener('click', function() {
+          dropdown.classList.remove('open');
+      });
+    })();
+
+    function reinitReel() {
+        var reelStrip = document.getElementById('reelStrip');
+        var topicWindow = document.getElementById('topicWindow');
+        var ITEM_HEIGHT = getItemHeight();
+        var WINDOW_HEIGHT = topicWindow.offsetHeight;
+        var visibleCount = 3;
+
+        var pool = questionBank[currentType].questions;
+        var initialQuestions = shuffleArray(pool).slice(0, visibleCount);
+
+        reelStrip.innerHTML = '';
+        reelStrip.classList.remove('settled');
+
+        initialQuestions.forEach(function(q) {
+            var div = document.createElement('div');
+            div.className = 'reel-item';
+            div.style.height = ITEM_HEIGHT + 'px';
+            div.textContent = q;
+            reelStrip.appendChild(div);
+        });
+
+        fitTextToWidth(reelStrip.children, topicWindow.offsetWidth - 32);
+
+        var middleIndex = 1;
+        var offsetY = -(middleIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2 - WINDOW_HEIGHT / 2);
+        reelStrip.style.transform = 'translateY(' + offsetY + 'px)';
+
+        reelStrip.classList.add('settled');
+        var centerItem = reelStrip.children[middleIndex];
+        if (centerItem) centerItem.classList.add('landed');
+    }
+
+    // --- Textarea feedback and database saving ---
+    async function analyseAnswer() {
+      const answer = document.getElementById('answer-input').value.trim();
+      if (!answer) { showToast('Write your answer first'); return; }
+
+      try {
+        const res = await fetch(`${API_BASE}/analyze-speech`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript: answer })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.feedback) {
+            document.getElementById('answer-feedback-items').innerHTML = data.feedback.slice(0, 5).map(i =>
+              `<div class="feedback-item"><span class="feedback-dot"></span><span>${i}</span></div>`
+            ).join('');
+            document.getElementById('answer-feedback').classList.remove('hidden');
+            if (window.otm_triggerConfetti) window.otm_triggerConfetti();
+            if (window.otm_logActivity) window.otm_logActivity();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend feedback failed, falling back to local heuristics:', err);
+      }
+
+      // Local heuristics fallback
+      const words = answer.split(/\s+/).length;
+      const hasEx = answer.toLowerCase().includes('example') || answer.toLowerCase().includes('instance') || answer.toLowerCase().includes('like');
+      const hasNum = /\b\d+\b|percent|%\b/.test(answer.toLowerCase());
+      const hasCon = answer.toLowerCase().includes('result') || answer.toLowerCase().includes('consequently') || answer.toLowerCase().includes('therefore') || answer.toLowerCase().includes('outcome');
+
+      const feedbackItems = [];
+      const fw = interviewFrameworkMap[currentQuestion] || 'prep';
+
+      if (fw === 'star') {
+        const hasS = answer.toLowerCase().includes('situation') || answer.toLowerCase().includes('context');
+        const hasT = answer.toLowerCase().includes('task') || answer.toLowerCase().includes('responsibility');
+        const hasA = answer.toLowerCase().includes('action') || answer.toLowerCase().includes('did') || answer.toLowerCase().includes('worked');
+        const hasR = answer.toLowerCase().includes('result') || answer.toLowerCase().includes('outcome') || answer.toLowerCase().includes('impact');
+
+        if (!hasS) feedbackItems.push('Define the **Situation** clearly. What was the context?');
+        if (!hasT) feedbackItems.push('Clarify your **Task**. What was your specific responsibility?');
+        if (!hasA) feedbackItems.push('Specify the **Action** you took. Highlight your individual contributions.');
+        if (!hasR) feedbackItems.push('Share the **Result** of your actions. Did you hit the goal?');
+        if (words < 80) feedbackItems.push('Your answer is very short for a STAR response. Aim for 100-250 words.');
+      } else if (fw === 'prep') {
+        const hasP = answer.toLowerCase().includes('point') || answer.toLowerCase().includes('believe');
+        const hasR = answer.toLowerCase().includes('reason') || answer.toLowerCase().includes('because');
+        
+        if (!hasP) feedbackItems.push('State your main **Point** clearly at the beginning.');
+        if (!hasR) feedbackItems.push('Provide a clear **Reason** supporting your main point.');
+        if (!hasEx) feedbackItems.push('Include a specific **Example** to back up your statement.');
+      } else {
+        if (words < 50)  feedbackItems.push('Consider elaborating. A strong answer should generally be at least 50 words.');
+        if (words > 300) feedbackItems.push('Consider trimming your answer slightly. Aim for a concise 2-minute summary.');
+        if (!hasEx)      feedbackItems.push('Add a concrete example or anecdote — it makes your answer far more credible.');
+        if (!hasNum)     feedbackItems.push('Try to quantify your impact where possible (e.g. "improved speed by 40%").');
+        if (!hasCon)     feedbackItems.push('Connect your actions to outcomes using transition phrases like "as a result".');
+        if (words >= 50 && words <= 300) feedbackItems.push('Good length — you\'ve found the right balance of detail and brevity.');
+      }
+
+      document.getElementById('answer-feedback-items').innerHTML = feedbackItems.slice(0,5).map(i =>
+        `<div class="feedback-item"><span class="feedback-dot"></span><span>${i}</span></div>`
+      ).join('');
+      document.getElementById('answer-feedback').classList.remove('hidden');
+      if (window.otm_triggerConfetti) window.otm_triggerConfetti();
+      if (window.otm_logActivity) window.otm_logActivity();
+    }
+
+    function clearAnswer() {
+      document.getElementById('answer-input').value = '';
+      document.getElementById('answer-feedback').classList.add('hidden');
+    }
+
+    async function saveAnswer() {
+      const answer = document.getElementById('answer-input').value.trim();
+      if (!answer) { showToast('Write your answer first'); return; }
+      if (!currentQuestion) { showToast('Generate a question first'); return; }
+      
+      const user = JSON.parse(localStorage.getItem('otm_user') || 'null');
+      if (user && user.id) {
+        try {
+          const data = await apiPost('/progress/save-answer', {
+            user_id: user.id,
+            question: currentQuestion,
+            answer: answer,
+            type: currentType
+          });
+          if (data && data.success) {
+            showToast('Answer saved to cloud ✓');
+          } else {
+            showToast('Saved locally.');
+          }
+        } catch (err) {
+          console.warn('Backend save-answer failed:', err);
+          showToast('Offline: saved locally.');
+        }
+      } else {
+        showToast('Saved locally.');
+      }
+
+      savedAnswers.push({ q: currentQuestion, a: answer, type: currentType, date: new Date().toLocaleDateString() });
+      localStorage.setItem('otm_saved_answers', JSON.stringify(savedAnswers));
+      renderSaved();
+      if (window.otm_triggerConfetti) window.otm_triggerConfetti();
+      if (window.otm_logActivity) window.otm_logActivity();
+    }
+
+    // Web Speech API Integration
+    let recognition = null;
+    let isListening = false;
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        isListening = true;
+        document.getElementById('mic-icon').textContent = '⏹️';
+        document.getElementById('mic-text').textContent = 'Stop Recording';
+        document.getElementById('mic-btn').classList.add('mic-recording');
+        
+        const status = document.getElementById('mic-status');
+        status.textContent = '🎙️ Listening... Speak your answer now. Tap stop when finished.';
+        status.style.display = 'block';
+        status.style.color = '#c9796a';
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        showToast(`Speech recognition error: ${event.error}`);
+        stopListeningState();
+      };
+
+      recognition.onend = () => {
+        stopListeningState();
+      };
+
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript + ' ';
+          }
+        }
+        if (finalTranscript) {
+          const textInput = document.getElementById('answer-input');
+          const currentVal = textInput.value;
+          textInput.value = currentVal + (currentVal ? ' ' : '') + finalTranscript.trim();
+          textInput.scrollTop = textInput.scrollHeight;
+        }
+      };
+    }
+
+    function stopListeningState() {
+      isListening = false;
+      const btn = document.getElementById('mic-btn');
+      if (btn) {
+        btn.classList.remove('mic-recording');
+        document.getElementById('mic-icon').textContent = '🎙️';
+        document.getElementById('mic-text').textContent = 'Record Answer';
+      }
+      const status = document.getElementById('mic-status');
+      if (status) {
+        status.textContent = 'Speech recognition stopped.';
+        setTimeout(() => {
+          if (!isListening) status.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    function toggleMic() {
+      if (!recognition) {
+        showToast('Speech recognition not supported in this browser. Please use Chrome or Edge.');
+        return;
+      }
+      if (isListening) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    }
+
+    function renderSaved() {
+      const list = document.getElementById('saved-answers-list');
+      document.getElementById('saved-count').textContent = savedAnswers.length;
+      if (!savedAnswers.length) {
+        list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem 0;">no saved answers yet</p>';
+        return;
+      }
+      list.innerHTML = savedAnswers.slice().reverse().map((item, i) => `
+        <div class="saved-item" style="flex-direction:column;align-items:flex-start;gap:0.5rem;">
+          <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
+            <span class="topic-badge" style="background:rgba(15,44,89,0.1); color:var(--text);">${item.type} · ${item.date}</span>
+          </div>
+          <div style="font-weight:600;font-size:0.88rem;color:var(--text);">${item.q}</div>
+          <div style="font-size:0.83rem;color:var(--muted);">${item.a.slice(0,120)}${item.a.length>120?'…':''}</div>
+        </div>
+      `).join('');
+    }
+
+    // Bind Spin Actions
+    document.getElementById('desktopSpinBtn').addEventListener('click', function() {
+        playHandleClunk();
+        triggerSpin(30);
+    });
+    document.getElementById('mobileSpinBtn').addEventListener('click', function() {
+        playHandleClunk();
+        triggerSpin(30);
+    });
+
+    window.addEventListener('resize', reinitReel);
+
+    // Escape listener for example popup
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeExamplePopup();
+    });
+
+    // Initialise
+    reinitReel();
+    renderSaved();
+  </script>
+</body>
+</html>

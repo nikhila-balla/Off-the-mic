@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Off The Mic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card fade-in" id="auth-card">
+
+      <!-- ── STEP 1: Email + Password ── -->
+      <div id="step-credentials">
+        <div class="auth-logo">Off The Mic</div>
+        <p class="auth-subtitle">welcome back. let's find your voice.</p>
+
+        <div id="auth-error" class="hidden"
+             style="background:#FFF0EE;border:1px solid #f0b9b0;border-radius:10px;
+                    padding:0.8rem 1rem;font-size:0.83rem;color:#9b4b3e;margin-bottom:1.2rem;"></div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div style="position:relative;">
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:3rem;" />
+            <button type="button" onclick="togglePassword('password','eye-login')"
+                    style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);
+                           background:none;border:none;cursor:pointer;color:var(--muted);
+                           font-size:1rem;padding:0;line-height:1;">
+              <span id="eye-login">👁️</span>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="login-btn"
+                style="width:100%;justify-content:center;margin-top:0.5rem;"
+                onclick="handleLogin()">
+          Login
+        </button>
+
+        <p class="auth-switch">no account? <a href="signup.html">sign up here</a></p>
+      </div>
+
+      <!-- ── STEP 2: OTP Verification ── -->
+      <div id="step-otp" class="hidden">
+        <div class="auth-logo">Off The Mic</div>
+        <p class="auth-subtitle">check your email for a 6-digit code</p>
+
+        <div id="otp-info"
+             style="background:#F0F5EF;border:1px solid #a8c09f;border-radius:10px;
+                    padding:0.8rem 1rem;font-size:0.83rem;color:#3e6b45;margin-bottom:1.2rem;text-align:center;">
+          OTP sent to <strong id="otp-email-display"></strong>
+        </div>
+
+        <div id="otp-error" class="hidden"
+             style="background:#FFF0EE;border:1px solid #f0b9b0;border-radius:10px;
+                    padding:0.8rem 1rem;font-size:0.83rem;color:#9b4b3e;margin-bottom:1.2rem;"></div>
+
+        <div class="form-group">
+          <label for="otp-input">Enter 6-Digit OTP</label>
+          <input type="text" id="otp-input" placeholder="_ _ _ _ _ _"
+                 maxlength="6" autocomplete="one-time-code"
+                 style="text-align:center;letter-spacing:8px;font-size:1.4rem;font-weight:600;" />
+        </div>
+
+        <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">
+          Code expires in <span id="otp-countdown" style="color:var(--text);font-weight:500;">10:00</span>
+        </p>
+
+        <button class="btn btn-primary" id="verify-btn"
+                style="width:100%;justify-content:center;"
+                onclick="handleVerifyOtp()">
+          Verify & Login
+        </button>
+
+        <div style="display:flex;justify-content:space-between;margin-top:1rem;">
+          <button onclick="goBackToCredentials()"
+                  style="background:none;border:none;cursor:pointer;
+                         font-size:0.83rem;color:var(--muted);font-family:'Poppins',sans-serif;">
+            ← change email
+          </button>
+          <button onclick="resendOtp()" id="resend-btn"
+                  style="background:none;border:none;cursor:pointer;
+                         font-size:0.83rem;color:var(--accent-dark);font-family:'Poppins',sans-serif;">
+            resend code
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+  <script>
+    const API = API_BASE;
+    let otpEmail = '';
+    let countdownInterval = null;
+
+    // ── STEP 1: Login ────────────────────────────────────────
+    async function handleLogin() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errBox   = document.getElementById('auth-error');
+      const btn      = document.getElementById('login-btn');
+      errBox.classList.add('hidden');
+
+      if (!email || !password) {
+        showError(errBox, 'Please fill in all fields.');
+        return;
+      }
+
+      btn.textContent = 'Sending OTP…';
+      btn.disabled    = true;
+
+      try {
+        const res = await fetch(`${API}/auth/login`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+          showError(errBox, data.message);
+          btn.textContent = 'Login';
+          btn.disabled    = false;
+          return;
+        }
+
+        otpEmail = data.email;
+        document.getElementById('otp-email-display').textContent = otpEmail;
+        switchToOtp();
+
+        const infoBox = document.getElementById('otp-info');
+        if (data.message && data.message.includes('console')) {
+          infoBox.style.background = '#FFF0EE';
+          infoBox.style.borderColor = '#f0b9b0';
+          infoBox.style.color = '#9b4b3e';
+          infoBox.innerHTML = `Email delivery failed. check server console/logs for OTP.`;
+          showToast('Email delivery failed. Check server console.', 4000);
+        } else {
+          infoBox.style.background = '#F0F5EF';
+          infoBox.style.borderColor = '#a8c09f';
+          infoBox.style.color = '#3e6b45';
+          infoBox.innerHTML = `OTP sent to <strong id="otp-email-display">${otpEmail}</strong>`;
+        }
+
+      } catch (err) {
+        showError(errBox, 'Could not connect to server. Is the backend running?');
+        btn.textContent = 'Login';
+        btn.disabled    = false;
+      }
+    }
+
+    // ── STEP 2: Verify OTP ───────────────────────────────────
+    async function handleVerifyOtp() {
+      const otp    = document.getElementById('otp-input').value.trim();
+      const errBox = document.getElementById('otp-error');
+      const btn    = document.getElementById('verify-btn');
+      errBox.classList.add('hidden');
+
+      if (otp.length !== 6) {
+        showError(errBox, 'Please enter the 6-digit code.');
+        return;
+      }
+
+      btn.textContent = 'Verifying…';
+      btn.disabled    = true;
+
+      try {
+        const res = await fetch(`${API}/auth/verify-otp`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email: otpEmail, otp }),
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+          showError(errBox, data.message);
+          btn.textContent = 'Verify & Login';
+          btn.disabled    = false;
+          return;
+        }
+
+        localStorage.setItem('otm_user',   JSON.stringify(data.user));
+        localStorage.setItem('otm_streak', data.user.streak || 0);
+
+        clearInterval(countdownInterval);
+        showToast('Welcome back! ✦');
+        setTimeout(() => window.location.href = 'dashboard.html', 900);
+
+      } catch (err) {
+        showError(errBox, 'Could not connect to server.');
+        btn.textContent = 'Verify & Login';
+        btn.disabled    = false;
+      }
+    }
+
+    // ── RESEND OTP ───────────────────────────────────────────
+    async function resendOtp() {
+      const password = document.getElementById('password').value;
+      document.getElementById('resend-btn').textContent = 'sending…';
+      try {
+        const res = await fetch(`${API}/auth/login`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email: otpEmail, password }),
+        });
+        const data = await res.json();
+        document.getElementById('otp-input').value = '';
+        const infoBox = document.getElementById('otp-info');
+        if (data.message && data.message.includes('console')) {
+          infoBox.style.background = '#FFF0EE';
+          infoBox.style.borderColor = '#f0b9b0';
+          infoBox.style.color = '#9b4b3e';
+          infoBox.innerHTML = `Email delivery failed. check server console/logs for OTP.`;
+          showToast('Email delivery failed. Check server console.', 4000);
+        } else {
+          infoBox.style.background = '#F0F5EF';
+          infoBox.style.borderColor = '#a8c09f';
+          infoBox.style.color = '#3e6b45';
+          infoBox.innerHTML = `OTP sent to <strong id="otp-email-display">${otpEmail}</strong>`;
+          showToast('New code sent!');
+        }
+        startCountdown(600);
+      } catch(e) {
+        showToast('Could not resend. Try again.');
+      }
+      document.getElementById('resend-btn').textContent = 'resend code';
+    }
+
+    // ── UI HELPERS ───────────────────────────────────────────
+    function switchToOtp() {
+      document.getElementById('step-credentials').classList.add('hidden');
+      document.getElementById('step-otp').classList.remove('hidden');
+      document.getElementById('otp-input').focus();
+      startCountdown(600);
+    }
+
+    function goBackToCredentials() {
+      clearInterval(countdownInterval);
+      document.getElementById('step-otp').classList.add('hidden');
+      document.getElementById('step-credentials').classList.remove('hidden');
+      document.getElementById('login-btn').textContent = 'Login';
+      document.getElementById('login-btn').disabled    = false;
+    }
+
+    function startCountdown(seconds) {
+      clearInterval(countdownInterval);
+      let s = seconds;
+      function tick() {
+        const m   = Math.floor(s / 60).toString().padStart(2, '0');
+        const sec = (s % 60).toString().padStart(2, '0');
+        document.getElementById('otp-countdown').textContent = `${m}:${sec}`;
+        if (s <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('otp-countdown').textContent = 'expired';
+          document.getElementById('otp-countdown').style.color = '#c9796a';
+        }
+        s--;
+      }
+      tick();
+      countdownInterval = setInterval(tick, 1000);
+    }
+
+    function showError(el, msg) {
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      if (!document.getElementById('step-otp').classList.contains('hidden')) {
+        handleVerifyOtp();
+      } else {
+        handleLogin();
+      }
+    });
+  </script>
+</body>
+</html>

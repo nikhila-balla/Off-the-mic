@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Off The Mic</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    #word-of-the-day-banner {
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    #word-of-the-day-banner:hover {
+      box-shadow: 0 12px 30px rgba(10, 31, 62, 0.35);
+      border-color: rgba(228, 169, 89, 0.45) !important;
+      transform: translateY(-2px);
+    }
+    #word-of-the-day-banner.expanded {
+      border-radius: 24px !important;
+      padding: 2.5rem 3rem !important;
+      cursor: default !important;
+      transform: none !important;
+    }
+    #word-of-the-day-banner.expanded:hover {
+      border-color: rgba(228, 169, 89, 0.25) !important;
+      box-shadow: 0 10px 30px rgba(10, 31, 62, 0.25) !important;
+      transform: none !important;
+    }
+    #wod-word:hover {
+      color: #e4a959 !important;
+      text-shadow: 0 0 12px rgba(228, 169, 89, 0.35);
+    }
+    @media (max-width: 768px) {
+      #wod-left-col {
+        border-right: none !important;
+        border-bottom: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+        padding-right: 0 !important;
+        padding-bottom: 1.5rem !important;
+        flex: 1 1 100% !important;
+      }
+      #word-of-the-day-banner.expanded {
+        padding: 2rem 1.5rem !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="dashboard.html" class="nav-brand">Off The Mic</a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html" style="font-weight:600;color:var(--text);">Dashboard</a></li>
+      <li><a href="vocab.html">Vocab</a></li>
+      <li><a href="analysis.html">Analysis</a></li>
+      <li><a href="interview.html">Interview</a></li>
+      <li><a href="progress.html">Progress</a></li>
+    </ul>
+    <button onclick="handleLogout()" class="btn btn-outline btn-sm" id="logout-btn">Log out</button>
+  </nav>
+
+  <div class="dashboard">
+    <div class="dashboard-header fade-in-1">
+      <h2 id="dash-greeting">good to have you back ✦</h2>
+      <p style="margin-bottom: 2rem;">choose where you want to practise today</p>
+    </div>
+
+    <div class="stats-strip fade-in-2">
+      <div class="stat-bubble">
+        <span class="stat-icon">🔥</span>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-streak">0</span>
+          <span class="stat-label">Day Streak</span>
+        </div>
+      </div>
+      <div class="stat-bubble">
+        <span class="stat-icon">🎙️</span>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-sessions">0</span>
+          <span class="stat-label">Practice Sessions</span>
+        </div>
+      </div>
+      <div class="stat-bubble">
+        <span class="stat-icon">📖</span>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-words">0</span>
+          <span class="stat-label">Words Learned</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORD OF THE DAY BANNER -->
+    <div class="container fade-in-2" style="max-width: 1100px; margin: 0 auto 2.5rem; padding: 0 2rem;">
+      <div id="word-of-the-day-banner" onclick="toggleWodCard()" style="background: linear-gradient(135deg, #102A54 0%, #0A1F3E 100%); border: 1.5px solid rgba(228, 169, 89, 0.25); border-radius: 50px; padding: 0.85rem 2rem; color: #FFFFFF; display: none; box-shadow: 0 6px 20px rgba(10, 31, 62, 0.2); position: relative; overflow: hidden; cursor: pointer;">
+        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(228, 169, 89, 0.08) 0%, transparent 70%); pointer-events: none;"></div>
+        
+        <!-- Collapsed Content -->
+        <div id="wod-collapsed-content" style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; transition: opacity 0.3s ease; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+            <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e4a959; background: rgba(228, 169, 89, 0.15); padding: 0.25rem 0.75rem; border-radius: 20px; flex-shrink: 0; display: inline-block;">✨ Word of the Day</span>
+            <span id="wod-collapsed-word" style="font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: #FFFFFF; display: inline-block;">—</span>
+            <span id="wod-collapsed-meaning-preview" style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">—</span>
+          </div>
+          <div style="font-size: 0.8rem; color: #e4a959; font-weight: bold; flex-shrink: 0; display: flex; align-items: center; gap: 6px; margin-left: 1rem;">
+            <span>Tap to reveal</span> <span id="wod-chevron" style="transition: transform 0.3s ease; display: inline-block; font-size: 0.7rem;">▼</span>
+          </div>
+        </div>
+
+        <!-- Expanded Content (Inside the same div) -->
+        <div id="wod-expanded-content" style="display: none; opacity: 0; flex-direction: column; gap: 1.5rem; position: relative; z-index: 1; width: 100%; transition: opacity 0.4s ease; text-align: left;">
+          <!-- Top Row back-collapsed button -->
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 1.5px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
+            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e4a959; background: rgba(228, 169, 89, 0.12); padding: 0.2rem 0.8rem; border-radius: 20px; width: fit-content;">✨ Word of the Day Details</span>
+            <div style="font-size: 0.8rem; color: #e4a959; font-weight: bold; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <span>Collapse</span> <span style="transform: rotate(180deg); font-size: 0.7rem;">▼</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 2.5rem; align-items: stretch; flex-wrap: wrap; margin-top: 0.5rem;">
+            <!-- LEFT SIDE: The word itself, styled dynamically, and date/day display -->
+            <div id="wod-left-col" style="flex: 0 0 300px; display: flex; flex-direction: column; justify-content: center; border-right: 1.5px solid rgba(255, 255, 255, 0.12); padding-right: 2.5rem; min-width: 250px;">
+              <div>
+                <h3 id="wod-word" style="font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 700; color: #FFFFFF; line-height: 1.1; margin: 0; transition: color 0.3s ease;">—</h3>
+                <p style="font-size: 0.85rem; color: #e4a959; margin-top: 0.4rem; font-weight: bold;" id="wod-day-name">—</p>
+              </div>
+            </div>
+            
+            <!-- RIGHT SIDE: Details (Meaning, Example, Challenge & Actions) -->
+            <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: space-between; gap: 1.2rem;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem;">
+                  <span id="wod-pos" style="font-size: 0.85rem; font-style: italic; color: #e4a959; font-weight: bold;">—</span>
+                  <span id="wod-pronun" style="font-size: 0.85rem; opacity: 0.7; font-family: monospace;">—</span>
+                </div>
+                <p id="wod-meaning" style="font-size: 1rem; color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin-bottom: 1rem;">—</p>
+                
+                <div style="border-left: 3px solid rgba(228, 169, 89, 0.3); padding-left: 1rem; margin-bottom: 1rem;">
+                  <span style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #e4a959; margin-bottom: 0.2rem;">Example:</span>
+                  <p id="wod-example" style="font-size: 0.88rem; font-style: italic; color: rgba(255, 255, 255, 0.75); line-height: 1.5; margin: 0;">—</p>
+                </div>
+              </div>
+              
+              <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.2rem; margin-top: auto;">
+                <div style="flex: 1; min-width: 200px;">
+                  <span style="display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #e4a959; margin-bottom: 0.2rem;">Speaking Challenge:</span>
+                  <p id="wod-challenge" style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.85); line-height: 1.4; margin: 0;">—</p>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; flex-shrink: 0; width: 100%; max-width: 260px;">
+                  <button onclick="event.stopPropagation(); speakWodWord()" class="btn btn-sm btn-outline" style="border-color: rgba(255,255,255,0.25); color: #FFFFFF; font-size: 0.78rem; padding: 0.4rem 1rem; flex: 1; justify-content: center; background: transparent; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">🔊 Pronounce</button>
+                  <a id="wod-practice-btn" href="#" onclick="event.stopPropagation();" class="btn btn-sm btn-primary" style="background: #e4a959; color: #0A1F3E; font-size: 0.78rem; padding: 0.4rem 1rem; flex: 1; text-align: center; text-decoration: none; justify-content: center; font-weight: bold; display: inline-flex; align-items: center; gap: 0.3rem; transition: all 0.2s;">Practice 🎙️</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <a href="vocab.html" class="feature-card fade-in-1">
+        <span class="card-icon">📖</span>
+        <div class="card-title">Learn Vocab</div>
+        <p class="card-desc">Expand your vocabulary with word-of-the-day cards, usage examples and daily speaking challenges.</p>
+      </a>
+
+      <a href="analysis.html" class="feature-card fade-in-2">
+        <span class="card-icon">🎙️</span>
+        <div class="card-title">Speech Analysis</div>
+        <p class="card-desc">Record yourself and get instant AI feedback on confidence, pacing, filler words and clarity.</p>
+      </a>
+
+      <a href="interview.html" class="feature-card fade-in-3">
+        <span class="card-icon">💼</span>
+        <div class="card-title">Interview Prep</div>
+        <p class="card-desc">Practise HR, technical and behavioural questions. Build answers that sound polished and natural.</p>
+      </a>
+
+      <a href="progress.html" class="feature-card fade-in-4">
+        <span class="card-icon">📈</span>
+        <div class="card-title">My Progress</div>
+        <p class="card-desc">Track your streak, words learned, sessions completed and confidence growth over time.</p>
+      </a>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const API = API_BASE;
+
+    const user = JSON.parse(localStorage.getItem('otm_user') || 'null');
+    if (user && user.display_name) {
+      document.getElementById('dash-greeting').textContent =
+        `good to have you back, ${user.display_name} ✦`;
+    }
+
+    async function loadStats() {
+      // 1. Load streak from localStorage (fallback / instant)
+      const streak = localStorage.getItem('otm_streak') || 0;
+      document.getElementById('stat-streak').textContent = streak;
+
+      // 2. Fetch live progress from database
+      if (user && user.id) {
+        try {
+          const res = await fetch(`${API}/progress?user_id=${user.id}`);
+          const data = await res.json();
+          if (data.success) {
+            document.getElementById('stat-streak').textContent = data.streak || streak;
+            document.getElementById('stat-sessions').textContent = data.sessions || 0;
+            document.getElementById('stat-words').textContent = data.words_learned || 0;
+          }
+        } catch (e) {
+          console.warn('Could not load stats from backend:', e);
+        }
+      }
+    }
+    loadStats();
+
+    let currentWodWord = '';
+    let wodExpanded = false;
+
+    function toggleWodCard() {
+      const banner = document.getElementById('word-of-the-day-banner');
+      const collapsed = document.getElementById('wod-collapsed-content');
+      const expanded = document.getElementById('wod-expanded-content');
+      const chevron = document.getElementById('wod-chevron');
+      
+      // If click was on a button/link inside the expanded card, do not collapse
+      if (wodExpanded && (event.target.closest('button') || event.target.closest('a'))) {
+        return;
+      }
+
+      wodExpanded = !wodExpanded;
+      if (wodExpanded) {
+        banner.classList.add('expanded');
+        collapsed.style.opacity = '0';
+        chevron.style.transform = 'rotate(180deg)';
+        setTimeout(() => {
+          collapsed.style.display = 'none';
+          expanded.style.display = 'flex';
+          setTimeout(() => { expanded.style.opacity = '1'; }, 50);
+        }, 150);
+      } else {
+        banner.classList.remove('expanded');
+        expanded.style.opacity = '0';
+        chevron.style.transform = 'rotate(0deg)';
+        setTimeout(() => {
+          expanded.style.display = 'none';
+          collapsed.style.display = 'flex';
+          setTimeout(() => { collapsed.style.opacity = '1'; }, 50);
+        }, 150);
+      }
+    }
+
+    async function loadWordOfDay() {
+      try {
+        const res = await fetch(`${API}/word-of-day`);
+        const data = await res.json();
+        if (data && data.word) {
+          currentWodWord = data.word;
+          document.getElementById('wod-word').textContent = data.word;
+          document.getElementById('wod-collapsed-word').textContent = data.word;
+          document.getElementById('wod-collapsed-meaning-preview').textContent = ` — ${data.meaning}`;
+
+          document.getElementById('wod-pos').textContent = `— ${data.pos || 'noun'}`;
+          document.getElementById('wod-pronun').textContent = data.pronunciation || '';
+          document.getElementById('wod-meaning').textContent = data.meaning;
+          document.getElementById('wod-example').textContent = data.example;
+          document.getElementById('wod-challenge').textContent = data.challenge || `Use this word in a 30-second speech.`;
+          
+          document.getElementById('wod-practice-btn').href = `timer.html?topic=Use ${encodeURIComponent(data.word.toLowerCase())} in a speech&duration=30`;
+          
+          if (data.publish_date) {
+            const parts = data.publish_date.split('-');
+            const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+            const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+            const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('wod-day-name').textContent = `${dayName}, ${formattedDate}`;
+          } else {
+            const today = new Date();
+            const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+            const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('wod-day-name').textContent = `${dayName}, ${formattedDate}`;
+          }
+
+          document.getElementById('word-of-the-day-banner').style.display = 'block';
+        }
+      } catch (e) {
+        console.warn('Could not load Word of the Day:', e);
+      }
+    }
+    loadWordOfDay();
+
+    function speakWodWord() {
+      if (!currentWodWord) return;
+      window.speechSynthesis.cancel();
+      var utter = new SpeechSynthesisUtterance(currentWodWord);
+      utter.lang = 'en-US';
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch(`${API}/auth/logout`, { method: 'POST' });
+      } catch(e) {}
+      localStorage.removeItem('otm_user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
